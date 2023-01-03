@@ -14,7 +14,7 @@ DEPS_DIR	= $(OBJS_DIR)
 ## Compilation
 
 CXX			= c++
-CXXFLAGS		= -Wall -Werror -Wextra -g -fsanitize=address
+CXXFLAGS		= -Wall -Werror -Wextra -std=c++98 -pedantic #-g -fsanitize=address
 INCLUDES	= -I $(INCLUDE_DIR)
 LIBS		=
 
