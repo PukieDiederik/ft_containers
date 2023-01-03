@@ -1,0 +1,8 @@
+#build files
+build
+tests
+
+# Editor files
+.idea
+.code
+*.swp
