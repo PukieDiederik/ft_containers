@@ -81,16 +81,16 @@ namespace ft
 		};
 	private:
 		pointer m_arr; // The internal array it will be using
-		size_type m_size; // The amount of elements in this vector, this may differ from m_max_size
-		size_type m_max_size; // The max internal size of the array
+		size_type m_size; // The amount of elements in this vector, this may differ from m_capacity
+		size_type m_capacity; // The max internal size of the array
 		Allocator m_alloc; // The allocator
 
 	public:
 		// Constructors / Destructors
-		vector() :m_arr(NULL), m_size(0), m_max_size(0), m_alloc(Allocator()) { }
-		explicit vector(const Allocator& alloc) :m_arr(NULL), m_size(0), m_max_size(0), m_alloc(alloc) { }
+		vector() : m_arr(NULL), m_size(0), m_capacity(0), m_alloc(Allocator()) { }
+		explicit vector(const Allocator& alloc) : m_arr(NULL), m_size(0), m_capacity(0), m_alloc(alloc) { }
 		explicit vector(size_type count, const_reference value = value_type(), const Allocator& alloc = Allocator())
-			:m_size(count), m_max_size(count), m_alloc(alloc)
+			: m_size(count), m_capacity(count), m_alloc(alloc)
 		{
 			m_arr = m_alloc.allocate(count);
 			std::fill_n(m_arr, count, value);
@@ -103,16 +103,16 @@ namespace ft
 //
 //			}
 //		}
-		vector(const vector& copy) :m_size(copy.m_size), m_max_size(copy.m_max_size), m_alloc(copy.m_alloc) // Copy Constructor
+		vector(const vector& copy) : m_size(copy.m_size), m_capacity(copy.m_capacity), m_alloc(copy.m_alloc) // Copy Constructor
 		{
-			m_arr = m_alloc.allocate(copy.m_max_size);
+			m_arr = m_alloc.allocate(copy.m_capacity);
 			std::copy(copy.cbegin(), copy.cend(), begin());
 		}
 
 		~vector()
 		{
 			if (m_arr)
-				m_alloc.deallocate(m_arr, m_max_size);
+				m_alloc.deallocate(m_arr, m_capacity);
 		}
 
 //		vector& operator=( const vector& other); // Copy assignment
@@ -166,11 +166,43 @@ namespace ft
 		bool empty() const {return m_size == 0; }
 		size_type size() const { return m_size; }
 		size_type max_size() const { return m_alloc.max_size(); }
-		size_type capacity() const { return m_max_size; }
+		size_type capacity() const { return m_capacity; }
 
-//		void reserve(size_type new_cap);
-//		void shrink_to_fit();
-//		void resize(size_type count, value_type value = value_type());
+		void reserve(size_type n)
+		{
+			if (n <= m_capacity)
+				return;
+			pointer tmp = m_alloc.allocate(n);
+			std::copy(cbegin(), cend(), tmp);
+			m_alloc.deallocate(m_arr, m_capacity);
+			m_arr = tmp;
+			m_capacity = n;
+		}
+
+		void shrink_to_fit()
+		{
+			if (m_size >= m_capacity)
+				return ;
+			pointer tmp = m_alloc.allocate(m_size);
+			std::copy(cbegin(), cend(), tmp);
+			m_alloc.deallocate(m_arr, m_capacity);
+			m_arr = tmp;
+			m_capacity = m_size;
+		}
+
+		void resize(size_type count, value_type value = value_type())
+		{
+			if (count == m_size && m_size == m_capacity)
+				return ;
+			pointer tmp = m_alloc.allocate(count);
+			std::copy(cbegin(), std::max(cbegin() + count, cend()), tmp);
+			m_alloc.deallocate(m_arr, m_capacity);
+			m_arr = tmp;
+			if (count > m_capacity)
+				std::fill_n(m_arr + m_capacity, count - m_size, value);
+			m_capacity = count;
+			m_size = count;
+		}
 
 		//Modifiers
 //		void clear();

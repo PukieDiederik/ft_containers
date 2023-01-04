@@ -9,7 +9,13 @@ void vector_test()
 	ft::vector<int> vec(3, 5);
 	ft::vector<int> vec2(vec);
 
-
+	vec2.resize(6, 7);
+	for (ft::vector<int>::iterator i = vec2.begin(); i != vec2.end(); ++i)
+	{
+		std::cout << *i << std::endl;
+	}
+	vec2.resize(2);
+	std::cout << "\n";
 	for (ft::vector<int>::iterator i = vec2.begin(); i != vec2.end(); ++i)
 	{
 		std::cout << *i << std::endl;
