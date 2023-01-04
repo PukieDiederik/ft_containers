@@ -4,6 +4,7 @@
 #include <cstddef> // Required for std::size_t
 #include "iterator.hpp"
 #include <memory>
+#include <algorithm>
 
 namespace ft
 {
@@ -75,9 +76,7 @@ namespace ft
 			_iterator& operator-=(difference_type n) { m_p -= n; return *this; }
 			_iterator operator-(difference_type n) const { return _iterator(m_p - n); }
 
-			const Base& base() const;
-
-
+			const Base& base() const { return m_p; }
 		};
 	private:
 		pointer m_arr; // The internal array it will be using
@@ -87,16 +86,35 @@ namespace ft
 
 	public:
 		// Constructors / Destructors
-		vector() { }
-		explicit vector(const Allocator& alloc) { }
-		explicit vector(size_type count, const_reference value = value_type(), const Allocator& alloc = Allocator()) { }
-		template<class InputIt>
-		vector(InputIt first, InputIt last, const Allocator& alloc = Allocator()) { }
-//		vector(const vector& copy) { } // Copy Constructor
+		vector() :m_arr(NULL), m_size(0), m_max_size(0), m_alloc(Allocator()) { }
+		explicit vector(const Allocator& alloc) :m_arr(NULL), m_size(0), m_max_size(0), m_alloc(alloc) { }
+		explicit vector(size_type count, const_reference value = value_type(), const Allocator& alloc = Allocator())
+			:m_size(count), m_max_size(count), m_alloc(alloc)
+		{
+			m_arr = m_alloc.allocate(count);
+			std::fill_n(m_arr, count, value);
+		}
+//		template<class InputIt>
+//		vector(InputIt first, InputIt last, const Allocator& alloc = Allocator()) :m_alloc(alloc)
+//		{
+//			for(InputIt i = first; i != last; ++i)
+//			{
+//
+//			}
+//		}
+		vector(const vector& copy) :m_size(copy.m_size), m_max_size(copy.m_max_size), m_alloc(copy.m_alloc) // Copy Constructor
+		{
+			m_arr = m_alloc.allocate(copy.m_max_size);
+			std::copy(copy.cbegin(), copy.cend(), begin());
+		}
 
-		~vector() { }
+		~vector()
+		{
+			if (m_arr)
+				m_alloc.deallocate(m_arr, m_max_size);
+		}
 
-//		vector& operator=( const vector& other ); // Copy assignment
+//		vector& operator=( const vector& other); // Copy assignment
 //		void assign(size_type count, const_reference value); // Replaces the contents with 'count' copies of 'value'
 //		template<class InputIt>
 //		void assign(InputIt first, InputIt last); // Replaces the contents with everything from 'first' to 'last'
