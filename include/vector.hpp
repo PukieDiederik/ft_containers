@@ -1,10 +1,11 @@
 #ifndef FT_VECTOR_HPP
 #define FT_VECTOR_HPP
 
-#include <cstddef> // Required for std::size_t
 #include "iterator.hpp"
-#include <memory>
+#include <cstddef> // Required for std::size_t
+#include <memory> // required for std::allocator
 #include <algorithm>
+#include <stdexcept> // required for std::out_of_range
 
 namespace ft
 {
@@ -118,25 +119,34 @@ namespace ft
 //		void assign(size_type count, const_reference value); // Replaces the contents with 'count' copies of 'value'
 //		template<class InputIt>
 //		void assign(InputIt first, InputIt last); // Replaces the contents with everything from 'first' to 'last'
-//		Allocator get_allocator() const;
+		Allocator get_allocator() const { return m_alloc; }
 
 		// Accessors
-//		reference at(size_type pos);
-//		const_reference at(size_type pos) const;
-//
-//		reference operator[](size_type pos);
-//		const_reference operator[](size_type pos) const;
-//
-//		reference front();
-//		const_reference front() const;
-//
-//		reference back();
-//		const_reference back() const;
-//
-//		pointer data();
-//		const_pointer data() const;
+		reference at(size_type pos)
+		{
+			if (pos >= m_size)
+				throw std::out_of_range("index out of range");
+			return m_arr[pos];
+		}
+		const_reference at(size_type pos) const
+		{
+			if (pos >= m_arr)
+				throw std::out_of_range("index out of range");
+			return m_arr[pos];
+		}
 
-		// TODO: Iterators
+		reference operator[](size_type pos) { return m_arr[pos]; }
+		const_reference operator[](size_type pos) const { return m_arr[pos]; }
+
+		reference front() { return *m_arr; }
+		const_reference front() const { return *m_arr; }
+
+		reference back() { return m_arr[m_size - 1]; }
+		const_reference back() const { return m_arr[m_size - 1]; }
+
+		pointer data() { return m_arr; }
+		const_pointer data() const { return m_arr; }
+
 		iterator begin() { return iterator(m_arr); }
 		const_iterator begin() const { return const_iterator(m_arr); }
 		iterator end() { return iterator(m_arr + m_size); }
@@ -153,10 +163,10 @@ namespace ft
 		const_reverse_iterator crend() const { return const_reverse_iterator(begin()); }
 
 		// Capacity
-//		bool empty() const;
-//		size_type size() const;
-//		size_type max_size() const;
-//		size_type capacity() const;
+		bool empty() const {return m_size == 0; }
+		size_type size() const { return m_size; }
+		size_type max_size() const { return m_alloc.max_size(); }
+		size_type capacity() const { return m_max_size; }
 
 //		void reserve(size_type new_cap);
 //		void shrink_to_fit();
