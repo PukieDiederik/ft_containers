@@ -10,7 +10,11 @@ namespace ft
 	template<class T, class Allocator = std::allocator<T> >
 	class vector
 	{
+	private:
+		template<typename Pointer_T>
+		class _iterator;
 	public: // Type defintions
+
 		typedef T			value_type;
 		typedef Allocator	allocator_type;
 
@@ -20,12 +24,59 @@ namespace ft
 		typedef typename allocator_type::const_pointer		const_pointer;
 
 		// TODO: Iterators
+		typedef _iterator<pointer>	iterator;
+		typedef _iterator<const_pointer>	const_iterator;
 
-		//TODO: update this to use iterator_traits<iterator>::difference_type instead
-		typedef std::ptrdiff_t	difference_type;
-		typedef std::size_t		size_type;
+		typedef typename iterator_traits<iterator>::difference_type	difference_type;
+		typedef std::size_t											size_type;
 
 
+	private:
+
+		// Iterator classes
+		template<typename Base>
+		class _iterator : public ft::iterator<ft::random_access_iterator_tag, value_type>
+		{
+		protected:
+			Base m_p;
+			typedef typename ft::iterator_traits<Base> m_traits;
+
+
+		public:
+			// Type definitions
+			typedef typename m_traits::iterator_category	iterator_category;
+			typedef typename m_traits::value_type			value_type;
+			typedef typename m_traits::difference_type		difference_type;
+			typedef typename m_traits::reference			reference;
+			typedef typename m_traits::pointer				pointer;
+
+			// Constructors / Destructors
+			_iterator() :m_p(NULL) { }
+			_iterator(const _iterator& copy) :m_p(copy.m_p) { }
+			_iterator(Base p) :m_p(p) { }
+			~_iterator() { }
+
+			_iterator& operator=(_iterator copy) { m_p = copy.m_p; return *this; }
+
+			// Operators
+			reference operator* () const { return *m_p; }
+			pointer operator->() const { return m_p; }
+
+			_iterator& operator++() { ++m_p; return *this; }
+			_iterator operator++(int) { return _iterator(m_p++); }
+			_iterator& operator--() { --m_p; return *this; }
+			_iterator operator--(int) { return _iterator(m_p--); }
+			reference operator[](difference_type n) const { return m_p[n]; }
+
+			_iterator& operator+=(difference_type n) { m_p += n; return *this; }
+			_iterator operator+(difference_type n) const { return _iterator(m_p + n); }
+			_iterator& operator-=(difference_type n) { m_p -= n; return *this; }
+			_iterator operator-(difference_type n) const { return _iterator(m_p - n); }
+
+			const Base& base() const;
+
+
+		};
 	private:
 		pointer m_arr; // The internal array it will be using
 		size_type m_size; // The amount of elements in this vector, this may differ from m_max_size
@@ -88,6 +139,49 @@ namespace ft
 //		void push_back(const value_type& value);
 //		void pop_back();
 		void swap(vector& other) { }
+
+		// Iterator comparison operators
+		template<typename IterL, typename IterR>
+		friend bool operator==(const _iterator<IterL>& lhs, const _iterator<IterR>& rhs)
+		{ return lhs.base() == rhs.base(); }
+		template<typename Iter>
+		friend bool operator==(const _iterator<Iter>& lhs, const _iterator<Iter>& rhs)
+		{ return lhs.base() == rhs.base(); }
+
+		template<typename IterL, typename IterR>
+		friend bool operator!=(const _iterator<IterL>& lhs, const _iterator<IterR>& rhs)
+		{ return lhs.base() != rhs.base(); }
+		template<typename Iter>
+		friend bool operator!=(const _iterator<Iter>& lhs, const _iterator<Iter>& rhs)
+		{ return lhs.base() != rhs.base(); }
+
+		template<typename IterL, typename IterR>
+		friend bool operator<(const _iterator<IterL>& lhs, const _iterator<IterR>& rhs)
+		{ return lhs.base() < rhs.base(); }
+		template<typename Iter>
+		friend bool operator<(const _iterator<Iter>& lhs, const _iterator<Iter>& rhs)
+		{ return lhs.base() < rhs.base(); }
+
+		template<typename IterL, typename IterR>
+		friend bool operator>(const _iterator<IterL>& lhs, const _iterator<IterR>& rhs)
+		{ return lhs.base() > rhs.base(); }
+		template<typename Iter>
+		friend bool operator>(const _iterator<Iter>& lhs, const _iterator<Iter>& rhs)
+		{ return lhs.base() > rhs.base(); }
+
+		template<typename IterL, typename IterR>
+		friend bool operator<=(const _iterator<IterL>& lhs, const _iterator<IterR>& rhs)
+		{ return lhs.base() <= rhs.base(); }
+		template<typename Iter>
+		friend bool operator<=(const _iterator<Iter>& lhs, const _iterator<Iter>& rhs)
+		{ return lhs.base() <= rhs.base(); }
+
+		template<typename IterL, typename IterR>
+		friend bool operator>=(const _iterator<IterL>& lhs, const _iterator<IterR>& rhs)
+		{ return lhs.base() >= rhs.base(); }
+		template<typename Iter>
+		friend bool operator>=(const _iterator<Iter>& lhs, const _iterator<Iter>& rhs)
+		{ return lhs.base() >= rhs.base(); }
 	};
 
 	// Operators

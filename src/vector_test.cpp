@@ -10,6 +10,7 @@ void vector_test()
 	ft::vector<int> b;
 	(void)v;
 	(void)b;
+	*std::vector<int>::iterator()++;
 //	std::swap(v, b);
 	// Actually test the vector class
 }
