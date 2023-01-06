@@ -277,17 +277,12 @@ namespace ft
 					typename ft::enable_if<!ft::is_integral<InputIt>::value>::type* = NULL)
 		{
 			int index = pos - begin();
-			std::cout << "index: " << index << std::endl;
 			int n = std::distance(first, last);
-			std::cout << "n: " << n << std::endl;
 			if (m_size + n > m_capacity)
 				resize(m_size + n);
 			if (begin() + index != end())
 				std::copy_backward(begin() + index, end(), end() + n);
-			for(; first != last; ++first, ++index)
-			{
-				index = *first;
-			}
+			std::copy(first, last, begin() + index);
 			m_size += n;
 		}
 
