@@ -248,7 +248,7 @@ namespace ft
 
 		iterator insert(iterator pos, const value_type& value)
 		{
-			int index = &*pos - m_arr;
+			difference_type index = &*pos - m_arr;
 			if (pos == end())
 			{
 				push_back(value);
@@ -264,7 +264,7 @@ namespace ft
 
 		void insert(iterator pos, size_type n, const value_type& value)
 		{
-			int index = &*pos - m_arr;
+			difference_type index = &*pos - m_arr;
 			if (m_size + n > m_capacity)
 				resize(m_size + n);
 			if (pos != end())
@@ -276,7 +276,7 @@ namespace ft
 		void insert(iterator pos, InputIt first, InputIt last,
 					typename ft::enable_if<!ft::is_integral<InputIt>::value>::type* = NULL)
 		{
-			int index = pos - begin();
+			difference_type index = pos - begin();
 			int n = std::distance(first, last);
 			if (m_size + n > m_capacity)
 				resize(m_size + n);
@@ -286,8 +286,18 @@ namespace ft
 			m_size += n;
 		}
 
-		//		iterator erase(iterator pos);
-//		iterator erase(iterator first, iterator last);
+		iterator erase(iterator pos)
+		{
+			std::copy(pos + 1, end(), pos);
+			m_size--;
+			return pos;
+		}
+		iterator erase(iterator first, iterator last)
+		{
+			std::copy (last, end(), first);
+			m_size -= last - first;
+			return first;
+		}
 
 		void push_back(const value_type& value)
 		{

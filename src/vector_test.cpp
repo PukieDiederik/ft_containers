@@ -26,7 +26,13 @@ void vector_test()
 	{
 		std::cout << *i << std::endl;
 	}
-	vec3.assign(vec.begin(), vec.end());
+	std::cout << std::endl;
+	vec3.erase(vec3.begin() + 1);
+	vec3.erase(vec3.begin() + 3, vec3.begin() + 7);
+	for (ft::vector<int>::iterator i = vec3.begin(); i != vec3.end(); ++i)
+	{
+		std::cout << *i << std::endl;
+	}
 	std::cout << "\n---\n" << std::endl;
 	vec2.resize(6, 7);
 	for (ft::vector<int>::iterator i = vec2.begin(); i != vec2.end(); ++i)
