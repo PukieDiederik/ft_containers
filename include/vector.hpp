@@ -2,6 +2,7 @@
 #define FT_VECTOR_HPP
 
 #include "iterator.hpp"
+#include "stl.hpp"
 #include <cstddef> // Required for std::size_t
 #include <memory> // required for std::allocator
 #include <algorithm>
@@ -25,7 +26,6 @@ namespace ft
 		typedef typename allocator_type::pointer			pointer;
 		typedef typename allocator_type::const_pointer		const_pointer;
 
-		// TODO: Iterators
 		typedef _iterator<pointer>						iterator;
 		typedef _iterator<const_pointer>				const_iterator;
 		typedef ft::reverse_iterator<iterator>			reverse_iterator;
@@ -39,7 +39,7 @@ namespace ft
 
 		// Iterator classes
 		template<typename Base>
-		class _iterator : public ft::iterator<ft::random_access_iterator_tag, value_type>
+		class _iterator : public ft::iterator<std::random_access_iterator_tag, value_type>
 		{
 		protected:
 			Base m_p;
@@ -74,8 +74,10 @@ namespace ft
 
 			_iterator& operator+=(difference_type n) { m_p += n; return *this; }
 			_iterator operator+(difference_type n) const { return _iterator(m_p + n); }
+			_iterator operator+(_iterator n) const { return _iterator(m_p + n.m_p); }
 			_iterator& operator-=(difference_type n) { m_p -= n; return *this; }
 			_iterator operator-(difference_type n) const { return _iterator(m_p - n); }
+			difference_type operator-(_iterator n) const { return m_p - n.m_p; }
 
 			const Base& base() const { return m_p; }
 		};
@@ -83,26 +85,26 @@ namespace ft
 		pointer m_arr; // The internal array it will be using
 		size_type m_size; // The amount of elements in this vector, this may differ from m_capacity
 		size_type m_capacity; // The max internal size of the array
-		Allocator m_alloc; // The allocator
+		allocator_type m_alloc; // The allocator
 
 	public:
 		// Constructors / Destructors
-		vector() : m_arr(NULL), m_size(0), m_capacity(0), m_alloc(Allocator()) { }
-		explicit vector(const Allocator& alloc) : m_arr(NULL), m_size(0), m_capacity(0), m_alloc(alloc) { }
-		explicit vector(size_type count, const_reference value = value_type(), const Allocator& alloc = Allocator())
+		explicit vector(const allocator_type& alloc = allocator_type()) : m_arr(NULL), m_size(0), m_capacity(0), m_alloc(alloc) { }
+		explicit vector(size_type count, const value_type& value = value_type(), const allocator_type& alloc = allocator_type())
 			: m_size(count), m_capacity(count), m_alloc(alloc)
 		{
 			m_arr = m_alloc.allocate(count);
 			std::fill_n(m_arr, count, value);
 		}
-//		template<class InputIt>
-//		vector(InputIt first, InputIt last, const Allocator& alloc = Allocator()) :m_alloc(alloc)
-//		{
-//			for(InputIt i = first; i != last; ++i)
-//			{
-//
-//			}
-//		}
+		template<typename InputIt>
+		vector(InputIt first, InputIt last, const allocator_type& alloc = allocator_type(),
+			   typename ft::enable_if<!ft::is_integral<InputIt>::value>::type* = NULL)
+			   :m_size(0), m_capacity(0), m_alloc(alloc)
+		{
+			for(InputIt i = first; i != last; ++i)
+				push_back(*i);
+		}
+
 		vector(const vector& copy) : m_size(copy.m_size), m_capacity(copy.m_capacity), m_alloc(copy.m_alloc) // Copy Constructor
 		{
 			m_arr = m_alloc.allocate(copy.m_capacity);
@@ -115,11 +117,39 @@ namespace ft
 				m_alloc.deallocate(m_arr, m_capacity);
 		}
 
-//		vector& operator=( const vector& other); // Copy assignment
-//		void assign(size_type count, const_reference value); // Replaces the contents with 'count' copies of 'value'
-//		template<class InputIt>
-//		void assign(InputIt first, InputIt last); // Replaces the contents with everything from 'first' to 'last'
-		Allocator get_allocator() const { return m_alloc; }
+		vector& operator=( const vector& copy) // Copy assignment
+		{
+			if (m_arr)
+				m_alloc.deallocate(m_arr, m_capacity);
+			m_alloc = copy.m_alloc;
+			m_arr = m_alloc.allocate(copy.m_capacity);
+			std::copy(copy.cbegin(), copy.cend(), m_arr);
+			m_size = copy.m_size;
+			m_capacity = copy.m_capacity;
+		}
+
+		void assign(size_type count, const_reference value) // Replaces the contents with 'count' copies of 'value'
+		{
+			if (m_arr)
+				m_alloc.deallocate(m_arr, m_capacity);
+			m_arr = NULL;
+			m_size = 0;
+			m_capacity = 0;
+			resize(count, value);
+		}
+
+		template<class InputIt>
+		void assign(InputIt first, InputIt last) // Replaces the contents with everything from 'first' to 'last'
+		{
+			if (m_arr)
+				m_alloc.deallocate(m_arr, m_capacity);
+			m_arr = NULL;
+			m_capacity = 0;
+			m_size = 0;
+			for (InputIt i = first; i != last; ++i)
+				push_back(*i);
+		}
+		allocator_type get_allocator() const { return m_alloc; }
 
 		// Accessors
 		reference at(size_type pos)
@@ -174,7 +204,8 @@ namespace ft
 				return;
 			pointer tmp = m_alloc.allocate(n);
 			std::copy(cbegin(), cend(), tmp);
-			m_alloc.deallocate(m_arr, m_capacity);
+			if (m_arr)
+				m_alloc.deallocate(m_arr, m_capacity);
 			m_arr = tmp;
 			m_capacity = n;
 		}
@@ -182,7 +213,7 @@ namespace ft
 		void shrink_to_fit()
 		{
 			if (m_size >= m_capacity)
-				return ;
+				return;
 			pointer tmp = m_alloc.allocate(m_size);
 			std::copy(cbegin(), cend(), tmp);
 			m_alloc.deallocate(m_arr, m_capacity);
@@ -193,28 +224,119 @@ namespace ft
 		void resize(size_type count, value_type value = value_type())
 		{
 			if (count == m_size && m_size == m_capacity)
-				return ;
+				return;
 			pointer tmp = m_alloc.allocate(count);
-			std::copy(cbegin(), std::max(cbegin() + count, cend()), tmp);
-			m_alloc.deallocate(m_arr, m_capacity);
+			std::copy(cbegin(), (count > m_size) ? cend() : (cbegin() + count), tmp);
+			if (m_arr)
+				m_alloc.deallocate(m_arr, m_capacity);
 			m_arr = tmp;
 			if (count > m_capacity)
-				std::fill_n(m_arr + m_capacity, count - m_size, value);
+				std::fill_n(m_arr + m_size, count - m_size, value);
+			if (count < m_size)
+				m_size = count;
 			m_capacity = count;
-			m_size = count;
 		}
 
 		//Modifiers
-//		void clear();
-//		iterator insert(iterator pos, const T& value);
-//		void insert(iterator pos, size_type n, const value_type& val);
-//		template<class InputIt>
-//		void insert(iterator pos, InputIt first, InputIt last);
-//		iterator erase(iterator pos);
+		void clear()
+		{
+			m_alloc.deallocate(m_arr, m_capacity);
+			m_arr = NULL;
+			m_size = 0;
+			m_capacity = 0;
+		}
+
+		iterator insert(iterator pos, const value_type& value)
+		{
+			int index = &*pos - m_arr;
+			if (pos == end())
+			{
+				push_back(value);
+				return end() - 1;
+			}
+			if (m_size == m_capacity)
+				resize(m_capacity << 1);
+			std::copy_backward(begin() + index, end(), end() + 1);
+			m_size++;
+			*(begin() + index) = value;
+			return (begin() + index);
+		}
+
+		void insert(iterator pos, size_type n, const value_type& value)
+		{
+			int index = &*pos - m_arr;
+			if (m_size + n > m_capacity)
+				resize(m_size + n);
+			if (pos != end())
+				std::copy_backward(begin() + index, end(), end() + n);
+			m_size += n;
+			std::fill_n(m_arr + index, n, value);
+		}
+		template<class InputIt>
+		void insert(iterator pos, InputIt first, InputIt last,
+					typename ft::enable_if<!ft::is_integral<InputIt>::value>::type* = NULL)
+		{
+			int index = pos - begin();
+			std::cout << "index: " << index << std::endl;
+			int n = std::distance(first, last);
+			std::cout << "n: " << n << std::endl;
+			if (m_size + n > m_capacity)
+				resize(m_size + n);
+			if (begin() + index != end())
+				std::copy_backward(begin() + index, end(), end() + n);
+			for(; first != last; ++first, ++index)
+			{
+				index = *first;
+			}
+			m_size += n;
+		}
+
+		//		iterator erase(iterator pos);
 //		iterator erase(iterator first, iterator last);
-//		void push_back(const value_type& value);
-//		void pop_back();
-		void swap(vector& other) { }
+
+		void push_back(const value_type& value)
+		{
+			if (m_capacity == 0)
+			{
+				m_capacity = 1;
+				m_arr = m_alloc.allocate(m_capacity);
+				m_size = 1;
+				*m_arr = value;
+				return;
+			}
+			else if (m_size >= m_capacity)
+			{
+				resize(m_capacity << 1);
+			}
+			m_arr[m_size] = value;
+			++m_size;
+		}
+		void pop_back()
+		{
+			if (m_size == 0)
+				return;
+			--m_size;
+			if (m_size <= m_capacity >> 1)
+				resize(m_capacity >> 1);
+		}
+		void swap(vector& other)
+		{
+			pointer tmp = m_arr;
+			m_arr = other.m_arr;
+			other.m_arr = tmp;
+
+			size_type tmps = m_size;
+			m_size = other.m_size;
+			other.m_size = tmps;
+
+			tmps = m_capacity;
+			m_capacity = other.m_capacity;
+			other.m_capacity = tmps;
+
+			Allocator alloc = m_alloc;
+			m_alloc = other.m_alloc;
+			other.m_alloc = alloc;
+		}
 
 		// Iterator comparison operators
 		template<typename IterL, typename IterR>
