@@ -133,6 +133,65 @@ static void check_construction()
 static void check_comparison() {
 	std::cout << "\033[0;33m> Testing comparison\033[0m" << std::endl;
 	// TODO: < > == != <= >=
+	ft::vector<int> v1;
+	ft::vector<int> v2;
+	ft::vector<int> v3;
+	ft::vector<int> v4;
+
+	v1.push_back(1);
+	v1.push_back(2);
+	v1.push_back(3);
+
+	v2.push_back(1);
+	v2.push_back(2);
+	v2.push_back(4);
+
+	v3.push_back(1);
+	v3.push_back(3);
+	v3.push_back(3);
+
+	v4 = v2;
+	PRINT_CAT(15, "operator==");
+	if (!(v4 == v2) || v4 == v3) {
+		PRINT_ERR("operator== does not return correct value");
+	}
+	else
+		std::cout << OK_MSG << std::endl;
+
+	PRINT_CAT(15, "operator!=");
+	if (v4 != v2 || !(v3 != v1) || !(v1 != v3)) {
+		PRINT_ERR("operator!= does not return correct value");
+	}
+	else
+		std::cout << OK_MSG << std::endl;
+
+	PRINT_CAT(15, "operator<");
+	if (!(v1 < v2) || !(v2 < v3) || !(v1 < v3) || v3 < v1) {
+		PRINT_ERR("operator< does not return correct value");
+	}
+	else
+		std::cout << OK_MSG << std::endl;
+
+	PRINT_CAT(15, "operator>");
+	if (!(v2 > v1) || !(v3 > v2) || !(v3 > v1) || v1 > v3) {
+		PRINT_ERR("operator> does not return correct value");
+	}
+	else
+		std::cout << OK_MSG << std::endl;
+
+	PRINT_CAT(15, "operator<=");
+	if (!(v2 <= v4) || !(v4 <= v2) || !(v1 <= v3) || v3 <= v1) {
+		PRINT_ERR("operator<= does not return correct value");
+	}
+	else
+		std::cout << OK_MSG << std::endl;
+
+	PRINT_CAT(15, "operator>=");
+	if (!(v2 >= v4) || !(v4 >= v2) || !(v3 >= v1) || v1 >= v3) {
+		PRINT_ERR("operator>= does not return correct value");
+	}
+	else
+		std::cout << OK_MSG << std::endl;
 }
 
 // Checks if iterators work as expected
@@ -146,7 +205,111 @@ static void check_iterator()
 static void check_accessor()
 {
 	std::cout << "\033[0;33m> Testing accessors\033[0m" << std::endl;
-	// TODO: at operator[] front back data
+	{ // at
+		PRINT_CAT(15, "at");
+		ft::vector<int> v;
+		for (int i = 25; i > 0; --i)
+		{
+			v.push_back(i);
+		}
+		if (v.at(3) != 22 || v.at(24) != 1 || v.at(12) != 13) {
+			PRINT_ERR("Returned incorrect value");
+		}
+		else
+			std::cout << OK_MSG;
+		v.at(6) = 99;
+		if (v.at(6) != 99) {
+			PRINT_ERR("Could not set number");
+		}
+		else
+			std::cout << OK_MSG;
+		try { v.at(-1); PRINT_ERR("Did not throw an exception"); }
+		catch (std::exception& e) { std::cout << OK_MSG; }
+		try { v.at(25); PRINT_ERR("Did not throw an exception"); }
+		catch (std::exception& e) { std::cout << OK_MSG << std::endl; }
+	}
+	{ // operator[]
+		PRINT_CAT(15, "operator[]");
+		ft::vector<int> v;
+		for (int i = 25; i > 0; --i)
+		{
+			v.push_back(i);
+		}
+		if (v[3] != 22 || v[24] != 1 || v[12] != 13) {
+			PRINT_ERR("Returned incorrect value");
+		}
+		else
+			std::cout << OK_MSG;
+		v[6] = 99;
+		if (v[6] != 99) {
+			PRINT_ERR("Could not set number");
+		}
+		else
+			std::cout << OK_MSG << std::endl;
+	}
+	{ // front
+		PRINT_CAT(15, "front");
+		ft::vector<int> v;
+		v.push_back(5);
+		if (v.front() != 5) {
+			PRINT_ERR("Incorrect value");
+		}
+		else
+			std::cout << OK_MSG;
+		v.push_back(8);
+		if (v.front() != 5) {
+			PRINT_ERR("Incorrect value");
+		}
+		else
+			std::cout << OK_MSG;
+		v.erase(v.begin());
+		if (v.front() != 8) {
+			PRINT_ERR("Incorrect value");
+		}
+		else
+			std::cout << OK_MSG << std::endl;
+	}
+	{ // back
+		PRINT_CAT(15, "back");
+		ft::vector<int> v;
+		v.push_back(5);
+		if (v.back() != 5) {
+			PRINT_ERR("Incorrect value");
+		}
+		else
+			std::cout << OK_MSG;
+		v.push_back(8);
+		if (v.back() != 8) {
+			PRINT_ERR("Incorrect value");
+		}
+		else
+			std::cout << OK_MSG;
+		v.push_back(-1);
+		if (v.back() != -1) {
+			PRINT_ERR("Incorrect value");
+		}
+		else
+			std::cout << OK_MSG;
+		v.pop_back();
+		if (v.back() != 8) {
+			PRINT_ERR("Incorrect value");
+		}
+		else
+			std::cout << OK_MSG << std::endl;
+	}
+	{ // data
+		PRINT_CAT(15, "data");
+		ft::vector<int> v;
+		for(int i = 0; i < 10; ++i)
+		{
+			v.push_back(i);
+		}
+		if (v.data()[3] != 3 || v.data()[6] != 6) {
+			PRINT_ERR("Incorrect value");
+		}
+		else
+			std::cout << OK_MSG << std::endl;
+	}
 }
 
 // Checks if manipulation functions that manipulate the size of the array work as expected

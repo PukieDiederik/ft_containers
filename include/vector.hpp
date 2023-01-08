@@ -126,6 +126,7 @@ namespace ft
 			std::copy(copy.cbegin(), copy.cend(), m_arr);
 			m_size = copy.m_size;
 			m_capacity = copy.m_capacity;
+			return *this;
 		}
 
 		void assign(size_type count, const_reference value) // Replaces the contents with 'count' copies of 'value'
