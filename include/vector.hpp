@@ -99,10 +99,11 @@ namespace ft
 		template<typename InputIt>
 		vector(InputIt first, InputIt last, const allocator_type& alloc = allocator_type(),
 			   typename ft::enable_if<!ft::is_integral<InputIt>::value>::type* = NULL)
-			   :m_size(0), m_capacity(0), m_alloc(alloc)
+			   :m_arr(0), m_size(0), m_capacity(0), m_alloc(alloc)
 		{
-			for(InputIt i = first; i != last; ++i)
-				push_back(*i);
+			reserve(std::distance(first, last));
+			std::copy(first, last, m_arr);
+			m_size = m_capacity;
 		}
 
 		vector(const vector& copy) : m_size(copy.m_size), m_capacity(copy.m_capacity), m_alloc(copy.m_alloc) // Copy Constructor
@@ -224,18 +225,20 @@ namespace ft
 
 		void resize(size_type count, value_type value = value_type())
 		{
-			if (count == m_size && m_size == m_capacity)
-				return;
-			pointer tmp = m_alloc.allocate(count);
-			std::copy(cbegin(), (count > m_size) ? cend() : (cbegin() + count), tmp);
-			if (m_arr)
-				m_alloc.deallocate(m_arr, m_capacity);
-			m_arr = tmp;
-			if (count > m_capacity)
-				std::fill_n(m_arr + m_size, count - m_size, value);
-			if (count < m_size)
+			if (count <= m_size) {
 				m_size = count;
-			m_capacity = count;
+				return;
+			}
+			if (count > m_capacity) {
+				pointer tmp = m_alloc.allocate(count);
+				std::copy(cbegin(), cend(), tmp);
+				if (m_arr)
+					m_alloc.deallocate(m_arr, m_capacity);
+				m_arr = tmp;
+				m_capacity = count;
+			}
+			std::fill_n(m_arr + m_size, count - m_size, value);
+			m_size = count;
 		}
 
 		//Modifiers
@@ -312,7 +315,7 @@ namespace ft
 			}
 			else if (m_size >= m_capacity)
 			{
-				resize(m_capacity << 1);
+				reserve(m_capacity << 1);
 			}
 			m_arr[m_size] = value;
 			++m_size;

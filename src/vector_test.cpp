@@ -204,7 +204,6 @@ static void check_iterator()
 	v.push_back(9);
 	v.push_back(12);
 
-	// TODO: begin end rbegin rend
 	{ // begin
 		PRINT_CAT(15, "begin");
 		ft::vector<int>::iterator it = v.begin();
@@ -421,7 +420,90 @@ static void check_accessor()
 static void check_size_manip()
 {
 	std::cout << "\033[0;33m> Testing size manipulation\033[0m" << std::endl;
-	// TODO: reserve shrink_to_fit resize clear
+	ft::vector<int> v_b(10, 5);
+	{ // reserve
+		PRINT_CAT(15, "reserve");
+		ft::vector<int> v(v_b);
+		v.reserve(25);
+		if (v.capacity() != 25 || v.size() != 10) {
+			PRINT_ERR("Did not reserve correct amount of memory");
+		}
+		else
+			std::cout << OK_MSG;
+
+		v.reserve(5);
+		if (v.capacity() != 25 || v.size() != 10) {
+			PRINT_ERR("Should not have reserved memory");
+		}
+		else
+			std::cout << OK_MSG;
+
+		v.reserve(27);
+		if (v.capacity() != 27 || v.size() != 10) {
+			PRINT_ERR("Did not reserve enough memory");
+		}
+		else
+			std::cout << OK_MSG << std::endl;
+	}
+	{ // Shrink_to_fit
+		PRINT_CAT(15, "shrink to fit");
+		ft::vector<int> v(v_b);
+		v.shrink_to_fit();
+		if (v.capacity() != v.size()) {
+			PRINT_ERR("Did not shrink memory correctly");
+		}
+		else
+			std::cout << OK_MSG;
+
+		v.push_back(2);
+		v.shrink_to_fit();
+		if (v.capacity() != v.size()) {
+			PRINT_ERR("Did not shrink memory correctly");
+		}
+		else
+			std::cout << OK_MSG;
+
+		v.shrink_to_fit();
+		if (v.capacity() != v.size()) {
+			PRINT_ERR("Did not shrink memory correctly");
+		}
+		else
+			std::cout << OK_MSG << std::endl;
+	}
+	{ // resize
+		PRINT_CAT(15, "resize");
+		ft::vector<int> v(v_b);
+		v.resize(25);
+		if (v.size() != 25) {
+			PRINT_ERR("Did not resize correctly");
+		}
+		else
+			std::cout << OK_MSG;
+
+		v.resize(5);
+		if (v.size() != 5) {
+			PRINT_ERR("Did not resize to smaller amount correctly");
+		}
+		else
+			std::cout << OK_MSG;
+
+		v.resize(7, 19);
+		if (v.size() != 7 || v[6] != 19) {
+			PRINT_ERR("Did not fill with correct value");
+		}
+		else
+			std::cout << OK_MSG << std::endl;
+	}
+	{ // clear
+		PRINT_CAT(15, "clear");
+		ft::vector<int> v(v_b);
+		v.clear();
+		if (v.capacity() != 0 || v.size() != 0 || v.data() != NULL) {
+			PRINT_ERR("Did not clear correctly");
+		}
+		else
+			std::cout << OK_MSG << std::endl;
+	}
 }
 
 // Checks if regular manipulation functions work
