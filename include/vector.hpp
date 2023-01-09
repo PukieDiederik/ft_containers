@@ -87,6 +87,11 @@ namespace ft
 		size_type m_capacity; // The max internal size of the array
 		allocator_type m_alloc; // The allocator
 
+		static void call_destructor(value_type& v)
+		{
+			v.~value_type();
+		}
+
 	public:
 		// Constructors / Destructors
 		explicit vector(const allocator_type& alloc = allocator_type()) : m_arr(NULL), m_size(0), m_capacity(0), m_alloc(alloc) { }
@@ -226,6 +231,7 @@ namespace ft
 		void resize(size_type count, value_type value = value_type())
 		{
 			if (count <= m_size) {
+				std::for_each(begin() + count, end(), call_destructor);
 				m_size = count;
 				return;
 			}
@@ -292,13 +298,17 @@ namespace ft
 
 		iterator erase(iterator pos)
 		{
+			call_destructor(*pos);
 			std::copy(pos + 1, end(), pos);
+			call_destructor(*(m_arr + m_size - 1));
 			m_size--;
 			return pos;
 		}
 		iterator erase(iterator first, iterator last)
 		{
+			std::for_each(first, last, call_destructor);
 			std::copy (last, end(), first);
+			std::for_each(last, end(), call_destructor);
 			m_size -= last - first;
 			return first;
 		}
@@ -324,6 +334,7 @@ namespace ft
 		{
 			if (m_size == 0)
 				return;
+			call_destructor(*(m_arr + m_size - 1));
 			--m_size;
 			if (m_size <= m_capacity >> 1)
 				resize(m_capacity >> 1);
