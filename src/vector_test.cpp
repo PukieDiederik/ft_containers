@@ -198,7 +198,112 @@ static void check_comparison() {
 static void check_iterator()
 {
 	std::cout << "\033[0;33m> Testing iterators\033[0m" << std::endl;
+
+	ft::vector<int> v;
+	v.push_back(5);
+	v.push_back(9);
+	v.push_back(12);
+
 	// TODO: begin end rbegin rend
+	{ // begin
+		PRINT_CAT(15, "begin");
+		ft::vector<int>::iterator it = v.begin();
+		if (&*it != v.data()) {
+			PRINT_ERR("Begin iterator does dereference to first element");
+		}
+		else
+			std::cout << OK_MSG;
+
+		++it;
+		if (&*it != v.data() + 1) {
+			PRINT_ERR("++Begin iterator does dereference to second element");
+		}
+		else
+			std::cout << OK_MSG;
+
+		++it;
+		if (&*it != v.data() + 2) {
+			PRINT_ERR("Begin + 2 does derefernce to second element");
+		}
+		else
+			std::cout << OK_MSG;
+
+		++it;
+		if (it != v.end() || v.begin() + 3 != v.end()) {
+			PRINT_ERR("Begin + 3 does not equal end()");
+		}
+		else
+			std::cout << OK_MSG << std::endl;
+	}
+	{ // end
+		PRINT_CAT(15, "end");
+
+		ft::vector<int>::iterator it = v.end();
+		if (&*it != v.data() + 3) {
+			PRINT_ERR("end iterator does not equal 1 past amount of elements");
+		}
+		else
+			std::cout << OK_MSG;
+
+		--it;
+		if (&*it != v.data() + 2) {
+			PRINT_ERR("--end iterator does dereference to second element");
+		}
+		else
+			std::cout << OK_MSG;
+		it--;
+
+		if (it - 1 != v.begin()) {
+			PRINT_ERR("end - 3 does not equal begin()");
+		}
+		else
+			std::cout << OK_MSG << std::endl;
+	}
+	{ // rbegin
+		PRINT_CAT(15, "rbegin");
+
+		ft::vector<int>::reverse_iterator it = v.rbegin();
+		if (&*(v.end() - 1) != &*it) {
+			PRINT_ERR("reverse iterator does not point to last object");
+		}
+		else
+			std::cout << OK_MSG;
+		it++;
+		if (&*it != v.data() + 1) {
+			PRINT_ERR("reverse iterator does not deference correctly");
+		}
+		else
+			std::cout << OK_MSG;
+		it += 2;
+
+		if (it != v.rend() || &*it != &*(v.begin() - 1)) {
+			PRINT_ERR("iterator does not match end");
+		}
+		else
+			std::cout << OK_MSG << std::endl;
+	}
+	{ // rend
+		PRINT_CAT(15, "rend");
+
+		ft::vector<int>::reverse_iterator it = v.rend();
+		if (&*(v.begin() - 1) != &*it) {
+			PRINT_ERR("reverse iterator does not point to last object");
+		}
+		else
+			std::cout << OK_MSG;
+		it--;
+		if (&*it != &*v.begin()) {
+			PRINT_ERR("reverse iterator does not deference correctly");
+		}
+		else
+			std::cout << OK_MSG;
+		it -= 3;
+		if (it != v.rbegin() - 1 || &*it != &*(v.end())) {
+			PRINT_ERR("iterator does not match end");
+		}
+		else
+			std::cout << OK_MSG << std::endl;
+	}
 }
 
 // Checks if accessor functions & operators work as expected
