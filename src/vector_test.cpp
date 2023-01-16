@@ -132,7 +132,6 @@ static void check_construction()
 // Checks if comparison operators work as expected
 static void check_comparison() {
 	std::cout << "\033[0;33m> Testing comparison\033[0m" << std::endl;
-	// TODO: < > == != <= >=
 	ft::vector<int> v1;
 	ft::vector<int> v2;
 	ft::vector<int> v3;
@@ -498,7 +497,7 @@ static void check_size_manip()
 		PRINT_CAT(15, "clear");
 		ft::vector<int> v(v_b);
 		v.clear();
-		if (v.capacity() != 0 || v.size() != 0 || v.data() != NULL) {
+		if (v.size() != 0) {
 			PRINT_ERR("Did not clear correctly");
 		}
 		else
@@ -510,14 +509,169 @@ static void check_size_manip()
 static void check_manip()
 {
 	std::cout << "\033[0;33m> Testing manipulation\033[0m" << std::endl;
-	// TODO: insert erase push_back pop_back
+	int arr[] = {5, 1, 19, 12, 0, 8};
+	{ // insert
+		PRINT_CAT(15, "insert");
+		ft::vector<int> v(arr, arr + 6);
+
+		v.insert(v.begin() + 3, 999);
+		if (v.size() != 7 || v[3] != 999 || v[6] != 8 || v[4] != 12) {
+			PRINT_ERR("Did not insert value in the middle correctly");
+		}
+		else
+			std::cout << OK_MSG;
+		v.insert(v.end(), 123);
+		if (v.size() != 8 || v[7] != 123) {
+			PRINT_ERR("Did not insert at end correctly");
+		}
+		else
+			std::cout << OK_MSG;
+		v.insert(v.begin(), 5, 45);
+		if (v.size() != 13 || v[0] != 45 || v[4] != 45) {
+			PRINT_ERR("Could not insert multiple values correctly");
+		}
+		else
+			std::cout << OK_MSG;
+		int a[] = {3, 9, 20};
+		v.insert(v.begin() + 1, a, a + 3);
+		if (v.size() != 16 || v[1] != 3 || v[2] != 9 || v[3] != 20) {
+			PRINT_ERR("Could not insert with iterators correctly");
+		}
+		else
+			std::cout << OK_MSG << std::endl;
+	}
+	{ // erase
+		PRINT_CAT(15, "erase");
+		ft::vector<int> v(arr, arr + 6);
+
+		v.erase(v.begin() + 1);
+		if (v.size() != 5 || v[0] != 5 || v[1] != 19) {
+			PRINT_ERR("Could not erase single element");
+		}
+		else
+			std::cout << OK_MSG;
+		v.erase(v.begin(), v.end());
+		if (v.size() != 0 || !v.empty()) {
+			PRINT_ERR("Did not erase entire array");
+		}
+		else
+			std::cout << OK_MSG;
+
+		v.assign(arr, arr + 6);
+		v.erase(v.begin() + 1, v.end() - 1);
+		if (v.size() != 2 || v[0] != 5 || v[1] != 8) {
+			PRINT_ERR("Did not erase multiple elements correctly");
+		}
+		else
+			std::cout << OK_MSG << std::endl;
+	}
+	{ // push_back
+		PRINT_CAT(15, "push_back");
+		ft::vector<int> v;
+
+		v.push_back(3);
+		if (v.size() != 1 || v[0] != 3){
+			PRINT_ERR("Could not push a value to an empty vector");
+		}
+		else
+			std::cout << OK_MSG;
+		v.push_back(17);
+		if (v.size() != 2 || v[0] != 3 || v[1] != 17) {
+			PRINT_ERR("Could not push to non-empty vector");
+		}
+		else
+			std::cout << OK_MSG << std::endl;
+	}
+	{ // pop_back
+		PRINT_CAT(15, "pop_back");
+		ft::vector<int> v(arr, arr + 6);
+
+		v.pop_back();
+		if (v.size() != 5 || v[4] != 0) {
+			PRINT_ERR("Did not pop correctly");
+		}
+		else
+			std::cout << OK_MSG;
+		v.pop_back();
+		if (v.size() != 4 || v[3] != 12) {
+			PRINT_ERR("Did not pop correctly");
+		}
+		else
+			std::cout << OK_MSG << std::endl;
+	}
 }
 
 // Check functions that didn't fit in another category
 static void check_other()
 {
 	std::cout << "\033[0;33m> Testing other\033[0m" << std::endl;
-	// TODO: assign swap std::swap
+	ft::vector<int> v1_b;
+	ft::vector<int> v2_b;
+
+	v1_b.push_back(1);
+	v1_b.push_back(2);
+	v1_b.push_back(3);
+
+	v2_b.push_back(4);
+	v2_b.push_back(5);
+	v2_b.push_back(6);
+	v2_b.push_back(7);
+	{ // std::swap
+		PRINT_CAT(15, "std::swap");
+		ft::vector<int> v1(v1_b);
+		ft::vector<int> v2(v2_b);
+
+		std::swap(v1, v2);
+		if (v1.size() != 4 || v2.size() != 3 || v1[0] != 4 || v1[3] != 7 || v2[0] != 1 || v2[2] != 3) {
+			PRINT_ERR("Did not swap correctly");
+		}
+		else
+			std::cout << OK_MSG << std::endl;
+	}
+	{ //swap
+		PRINT_CAT(15, "swap");
+		ft::vector<int> v1(v1_b);
+		ft::vector<int> v2(v2_b);
+
+		v1.swap(v2);
+		if (v1.size() != 4 || v2.size() != 3 || v1[0] != 4 || v1[3] != 7 || v2[0] != 1 || v2[2] != 3) {
+			PRINT_ERR("Did not swap correctly");
+		}
+		else
+			std::cout << OK_MSG;
+
+		ft::vector<int>().swap(v1);
+		if (!v1.empty() || v1.capacity() != 0 || v1.data() != NULL){
+			PRINT_ERR("did not swap correctly with NULL vector");
+		}
+		else
+			std::cout << OK_MSG << std::endl;
+	}
+	{
+		PRINT_CAT(15, "assign");
+		ft::vector<int> v1(v1_b);
+		ft::vector<int> v2;
+
+		v1.assign(15, 5);
+		if (v1.size() != 15 || v1[3] != 5 || v1[14] != 5) {
+			PRINT_ERR("Did not assign correctly");
+		}
+		else
+			std::cout << OK_MSG;
+		v2.assign(4, -3);
+		if (v2.size() != 4 || v2[3] != -3 || v2[0] != -3) {
+			PRINT_ERR("Did not assign correctly with empty vector");
+		}
+		else
+			std::cout << OK_MSG;
+		v2.clear();
+
+		v2.assign(v1.begin(), v1.end() - 3);
+		if (v2.size() != 12 || v2[5] != 5 || v2[11] != 5) {
+			PRINT_ERR("Could Not assign correctly with an iterator");
+		}
+		else std::cout << OK_MSG << std::endl;
+	}
 }
 
 void vector_test()

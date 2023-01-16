@@ -7,6 +7,7 @@
 #include <memory> // required for std::allocator
 #include <algorithm>
 #include <stdexcept> // required for std::out_of_range
+#include <cstring>
 
 namespace ft
 {
@@ -146,7 +147,8 @@ namespace ft
 		}
 
 		template<class InputIt>
-		void assign(InputIt first, InputIt last) // Replaces the contents with everything from 'first' to 'last'
+		void assign(InputIt first, InputIt last,
+					typename ft::enable_if<!ft::is_integral<InputIt>::value>::type* = 0)
 		{
 			if (m_arr)
 				m_alloc.deallocate(m_arr, m_capacity);
@@ -250,10 +252,8 @@ namespace ft
 		//Modifiers
 		void clear()
 		{
-			m_alloc.deallocate(m_arr, m_capacity);
-			m_arr = NULL;
+			std::for_each(begin(), end(), call_destructor);
 			m_size = 0;
-			m_capacity = 0;
 		}
 
 		iterator insert(iterator pos, const value_type& value)
@@ -265,8 +265,8 @@ namespace ft
 				return end() - 1;
 			}
 			if (m_size == m_capacity)
-				resize(m_capacity << 1);
-			std::copy_backward(begin() + index, end(), end() + 1);
+				reserve(m_capacity << 1);
+			std::memmove(m_arr + index + 1, m_arr + index, sizeof(value_type) * (m_size - index));
 			m_size++;
 			*(begin() + index) = value;
 			return (begin() + index);
@@ -276,7 +276,7 @@ namespace ft
 		{
 			difference_type index = &*pos - m_arr;
 			if (m_size + n > m_capacity)
-				resize(m_size + n);
+				reserve(m_size + n);
 			if (pos != end())
 				std::copy_backward(begin() + index, end(), end() + n);
 			m_size += n;
@@ -289,7 +289,7 @@ namespace ft
 			difference_type index = pos - begin();
 			int n = std::distance(first, last);
 			if (m_size + n > m_capacity)
-				resize(m_size + n);
+				reserve(m_size + n);
 			if (begin() + index != end())
 				std::copy_backward(begin() + index, end(), end() + n);
 			std::copy(first, last, begin() + index);
@@ -336,8 +336,6 @@ namespace ft
 				return;
 			call_destructor(*(m_arr + m_size - 1));
 			--m_size;
-			if (m_size <= m_capacity >> 1)
-				resize(m_capacity >> 1);
 		}
 		void swap(vector& other)
 		{
