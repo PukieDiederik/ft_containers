@@ -88,11 +88,6 @@ namespace ft
 		size_type m_capacity; // The max internal size of the array
 		allocator_type m_alloc; // The allocator
 
-		static void call_destructor(value_type& v)
-		{
-			v.~value_type();
-		}
-
 	public:
 		// Constructors / Destructors
 		explicit vector(const allocator_type& alloc = allocator_type()) : m_arr(NULL), m_size(0), m_capacity(0), m_alloc(alloc) { }
@@ -115,7 +110,7 @@ namespace ft
 		vector(const vector& copy) : m_size(copy.m_size), m_capacity(copy.m_capacity), m_alloc(copy.m_alloc) // Copy Constructor
 		{
 			m_arr = m_alloc.allocate(copy.m_capacity);
-			std::copy(copy.cbegin(), copy.cend(), begin());
+			std::copy(copy.begin(), copy.end(), begin());
 		}
 
 		~vector()
@@ -130,13 +125,14 @@ namespace ft
 				m_alloc.deallocate(m_arr, m_capacity);
 			m_alloc = copy.m_alloc;
 			m_arr = m_alloc.allocate(copy.m_capacity);
-			std::copy(copy.cbegin(), copy.cend(), m_arr);
+			std::copy(copy.begin(), copy.end(), m_arr);
 			m_size = copy.m_size;
 			m_capacity = copy.m_capacity;
 			return *this;
 		}
 
-		void assign(size_type count, const_reference value) // Replaces the contents with 'count' copies of 'value'
+		// Functions
+		void assign(size_type count, const_reference value)
 		{
 			if (m_arr)
 				m_alloc.deallocate(m_arr, m_capacity);
@@ -196,10 +192,10 @@ namespace ft
 		reverse_iterator rend() { return reverse_iterator(begin()); }
 		const_reverse_iterator rend() const { return const_reverse_iterator(begin()); }
 
-		const_iterator cbegin() const { return const_iterator(m_arr); }
-		const_iterator cend() const { return const_iterator(m_arr + m_size); }
-		const_reverse_iterator crbegin() const { return const_reverse_iterator(end()); }
-		const_reverse_iterator crend() const { return const_reverse_iterator(begin()); }
+//		const_iterator cbegin() const { return const_iterator(m_arr); }
+//		const_iterator cend() const { return const_iterator(m_arr + m_size); }
+//		const_reverse_iterator crbegin() const { return const_reverse_iterator(end()); }
+//		const_reverse_iterator crend() const { return const_reverse_iterator(begin()); }
 
 		// Capacity
 		bool empty() const {return m_size == 0; }
@@ -212,9 +208,11 @@ namespace ft
 			if (n <= m_capacity)
 				return;
 			pointer tmp = m_alloc.allocate(n);
-			std::copy(cbegin(), cend(), tmp);
 			if (m_arr)
+			{
+				std::memmove(tmp, m_arr, sizeof(T) * m_size);
 				m_alloc.deallocate(m_arr, m_capacity);
+			}
 			m_arr = tmp;
 			m_capacity = n;
 		}
@@ -224,7 +222,7 @@ namespace ft
 			if (m_size >= m_capacity)
 				return;
 			pointer tmp = m_alloc.allocate(m_size);
-			std::copy(cbegin(), cend(), tmp);
+			std::memcpy(tmp, m_arr, sizeof(T) * m_size);
 			m_alloc.deallocate(m_arr, m_capacity);
 			m_arr = tmp;
 			m_capacity = m_size;
@@ -233,13 +231,14 @@ namespace ft
 		void resize(size_type count, value_type value = value_type())
 		{
 			if (count <= m_size) {
-				std::for_each(begin() + count, end(), call_destructor);
+				for (size_type i = 0; i < m_size - count; ++i)
+					m_alloc.destroy(m_arr + i);
 				m_size = count;
 				return;
 			}
 			if (count > m_capacity) {
 				pointer tmp = m_alloc.allocate(count);
-				std::copy(cbegin(), cend(), tmp);
+				std::copy(begin(), end(), tmp);
 				if (m_arr)
 					m_alloc.deallocate(m_arr, m_capacity);
 				m_arr = tmp;
@@ -252,7 +251,8 @@ namespace ft
 		//Modifiers
 		void clear()
 		{
-			std::for_each(begin(), end(), call_destructor);
+			for (size_type i = 0; i < m_size; ++i)
+				m_alloc.destroy(m_arr + i);
 			m_size = 0;
 		}
 
@@ -292,23 +292,23 @@ namespace ft
 				reserve(m_size + n);
 			if (begin() + index != end())
 				std::copy_backward(begin() + index, end(), end() + n);
-			std::copy(first, last, begin() + index);
+			for (InputIt i = first; i != last; ++i, ++index)
+				m_alloc.construct(m_arr + index, *i);
 			m_size += n;
 		}
 
 		iterator erase(iterator pos)
 		{
-			call_destructor(*pos);
-			std::copy(pos + 1, end(), pos);
-			call_destructor(*(m_arr + m_size - 1));
+			m_alloc.destroy(&*pos);
+			std::memmove(&*pos, (&*pos) + 1, sizeof(T) * (m_size - (&*(pos + 1) - m_arr)));
 			m_size--;
 			return pos;
 		}
 		iterator erase(iterator first, iterator last)
 		{
-			std::for_each(first, last, call_destructor);
-			std::copy (last, end(), first);
-			std::for_each(last, end(), call_destructor);
+			for(iterator i = first; i != last; ++i)
+				m_alloc.destroy(&(*i));
+			std::memmove(&*first, &*last, sizeof(T) * (end() - last));
 			m_size -= last - first;
 			return first;
 		}
@@ -319,22 +319,22 @@ namespace ft
 			{
 				m_capacity = 1;
 				m_arr = m_alloc.allocate(m_capacity);
+				m_alloc.construct(m_arr, value);
 				m_size = 1;
-				*m_arr = value;
 				return;
 			}
 			else if (m_size >= m_capacity)
 			{
 				reserve(m_capacity << 1);
 			}
-			m_arr[m_size] = value;
+			m_alloc.construct(m_arr + m_size, value);
 			++m_size;
 		}
 		void pop_back()
 		{
 			if (m_size == 0)
 				return;
-			call_destructor(*(m_arr + m_size - 1));
+			m_alloc.destroy(m_arr + m_size);
 			--m_size;
 		}
 		void swap(vector& other)

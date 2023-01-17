@@ -550,6 +550,7 @@ static void check_manip()
 		}
 		else
 			std::cout << OK_MSG;
+
 		v.erase(v.begin(), v.end());
 		if (v.size() != 0 || !v.empty()) {
 			PRINT_ERR("Did not erase entire array");
