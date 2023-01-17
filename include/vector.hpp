@@ -210,7 +210,7 @@ namespace ft
 			pointer tmp = m_alloc.allocate(n);
 			if (m_arr)
 			{
-				std::memmove(tmp, m_arr, sizeof(T) * m_size);
+				std::memcpy(tmp, m_arr, sizeof(T) * m_size);
 				m_alloc.deallocate(m_arr, m_capacity);
 			}
 			m_arr = tmp;
