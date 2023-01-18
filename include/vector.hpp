@@ -210,7 +210,7 @@ namespace ft
 			pointer tmp = m_alloc.allocate(n);
 			if (m_arr)
 			{
-				std::memcpy(tmp, m_arr, sizeof(T) * m_size);
+				std::copy(begin(), end(), tmp);
 				m_alloc.deallocate(m_arr, m_capacity);
 			}
 			m_arr = tmp;
@@ -222,7 +222,7 @@ namespace ft
 			if (m_size >= m_capacity)
 				return;
 			pointer tmp = m_alloc.allocate(m_size);
-			std::memcpy(tmp, m_arr, sizeof(T) * m_size);
+			std::copy(begin(), end(), tmp);
 			m_alloc.deallocate(m_arr, m_capacity);
 			m_arr = tmp;
 			m_capacity = m_size;
@@ -280,7 +280,8 @@ namespace ft
 			if (pos != end())
 				std::copy_backward(begin() + index, end(), end() + n);
 			m_size += n;
-			std::fill_n(m_arr + index, n, value);
+			for(size_type i = 0; i < n; ++i)
+				m_alloc.construct(m_arr + index + i, value);
 		}
 		template<class InputIt>
 		void insert(iterator pos, InputIt first, InputIt last,
