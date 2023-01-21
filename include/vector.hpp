@@ -3,11 +3,11 @@
 
 #include "iterator.hpp"
 #include "stl.hpp"
-#include <cstddef> // Required for std::size_t
-#include <memory> // required for std::allocator
 #include <algorithm>
-#include <stdexcept> // required for std::out_of_range
+#include <cstddef> // Required for std::size_t
 #include <cstring>
+#include <memory> // required for std::allocator
+#include <stdexcept> // required for std::out_of_range
 
 namespace ft
 {
@@ -90,12 +90,16 @@ namespace ft
 
 	public:
 		// Constructors / Destructors
-		explicit vector(const allocator_type& alloc = allocator_type()) : m_arr(NULL), m_size(0), m_capacity(0), m_alloc(alloc) { }
-		explicit vector(size_type count, const value_type& value = value_type(), const allocator_type& alloc = allocator_type())
+		explicit vector(const allocator_type& alloc = allocator_type())
+			: m_arr(NULL), m_size(0), m_capacity(0), m_alloc(alloc) { }
+		explicit vector(size_type count, const value_type& value = value_type(),
+			const allocator_type& alloc = allocator_type())
 			: m_size(count), m_capacity(count), m_alloc(alloc)
 		{
-			m_arr = m_alloc.allocate(count);
-			std::fill_n(m_arr, count, value);
+			if (count)
+				m_arr = m_alloc.allocate(count);
+			for (size_type i = 0; i < count; ++i)
+				m_alloc.construct(m_arr + i, value);
 		}
 		template<typename InputIt>
 		vector(InputIt first, InputIt last, const allocator_type& alloc = allocator_type(),
@@ -107,9 +111,10 @@ namespace ft
 			m_size = m_capacity;
 		}
 
-		vector(const vector& copy) : m_size(copy.m_size), m_capacity(copy.m_capacity), m_alloc(copy.m_alloc) // Copy Constructor
+		vector(const vector& copy) : m_arr(NULL), m_size(copy.m_size), m_capacity(copy.m_capacity), m_alloc(copy.m_alloc) // Copy Constructor
 		{
-			m_arr = m_alloc.allocate(copy.m_capacity);
+			if (m_capacity != 0)
+				m_arr = m_alloc.allocate(copy.m_capacity);
 			std::copy(copy.begin(), copy.end(), begin());
 		}
 

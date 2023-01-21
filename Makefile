@@ -1,7 +1,8 @@
 ## File stuff
 SHELL		=	/bin/zsh
 
-FNAMES		=	vector_test.cpp main.cpp
+FNAMES		=	vector_test.cpp stack_test.cpp\
+				main.cpp
 
 SRCS		= $(addprefix $(SRCS_DIR)/,$(FNAMES))
 OBJS		= $(addprefix $(OBJS_DIR)/,$(notdir $(FNAMES:.cpp=.o)))

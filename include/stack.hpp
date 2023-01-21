@@ -8,7 +8,7 @@ namespace ft
 	template <typename T, typename Container = ft::vector<T> >
 	class stack
 	{
-	protected:
+	public:
 		Container c;
 	public:
 		// typedefs
@@ -20,6 +20,7 @@ namespace ft
 
 		// Constructors/Destructor
 		explicit stack(const Container& cont = Container()) : c(cont) { }
+		stack(const stack& copy) :c(copy.c) { }
 		~stack () { }
 		stack& operator=(const stack& copy)
 		{
@@ -35,12 +36,18 @@ namespace ft
 		void push(const value_type& value) { c.push_back(value); }
 		void pop() { c.pop_back(); }
 
-		friend bool operator==(const ft::stack<T, Container> lhs, const ft::stack<T, Container> rhs);
-		friend bool operator!=(const ft::stack<T, Container> lhs, const ft::stack<T, Container> rhs);
-		friend bool operator<=(const ft::stack<T, Container> lhs, const ft::stack<T, Container> rhs);
-		friend bool operator>=(const ft::stack<T, Container> lhs, const ft::stack<T, Container> rhs);
-		friend bool operator<(const ft::stack<T, Container> lhs, const ft::stack<T, Container> rhs);
-		friend bool operator>(const ft::stack<T, Container> lhs, const ft::stack<T, Container> rhs);
+		template <typename A,typename B>
+		friend bool operator==(const ft::stack<A, B> lhs, const ft::stack<A, B> rhs);
+		template <typename A,typename B>
+		friend bool operator!=(const ft::stack<A, B> lhs, const ft::stack<A, B> rhs);
+		template <typename A,typename B>
+		friend bool operator<=(const ft::stack<A, B> lhs, const ft::stack<A, B> rhs);
+		template <typename A,typename B>
+		friend bool operator>=(const ft::stack<A, B> lhs, const ft::stack<A, B> rhs);
+		template <typename A,typename B>
+		friend bool operator<(const ft::stack<A, B> lhs, const ft::stack<A, B> rhs);
+		template <typename A,typename B>
+		friend bool operator>(const ft::stack<A, B> lhs, const ft::stack<A, B> rhs);
 
 	};
 

@@ -1,13 +1,9 @@
+#include "test.hpp"
+#include "vector.hpp"
 #include <iostream>
 #include <iomanip>
 #include <stdexcept>
-#include "vector.hpp"
 #include <vector>
-#include "stl.hpp"
-
-#define PRINT_ERR(MSG) std::cout << "\033[0;31m KO.\033[0m" << std::endl; std::cerr << "\033[0;31m"MSG"\n\033[0m"
-#define OK_MSG "\033[0;32mOK. \033[0m"
-#define PRINT_CAT(WIDTH,MSG) std::cout << std::left << std::setw(WIDTH) << MSG << ": "
 
 // Checks if all constructors work as expected
 static void check_construction()
@@ -677,7 +673,7 @@ static void check_other()
 
 void vector_test()
 {
-	std::cout << "\033[0;36m>>>>> Testing \033[0mvectors" << std::endl;
+	std::cout << "\033[0;36m>>>>> Testing \033[0mvector" << std::endl;
 
 	check_construction();
 	check_accessor();
