@@ -139,6 +139,9 @@ namespace ft
 		// Functions
 		void assign(size_type count, const_reference value)
 		{
+			//destroy existing elements
+			for (size_type i = 0; i < m_size; ++i)
+				m_alloc.destroy(m_arr + i);
 			if (m_arr)
 				m_alloc.deallocate(m_arr, m_capacity);
 			m_arr = NULL;
@@ -151,6 +154,9 @@ namespace ft
 		void assign(InputIt first, InputIt last,
 					typename ft::enable_if<!ft::is_integral<InputIt>::value>::type* = 0)
 		{
+			//destroy existing elements
+			for (size_type i = 0; i < m_size; ++i)
+				m_alloc.destroy(m_arr + i);
 			if (m_arr)
 				m_alloc.deallocate(m_arr, m_capacity);
 			m_arr = NULL;
@@ -215,7 +221,7 @@ namespace ft
 			pointer tmp = m_alloc.allocate(n);
 			if (m_arr)
 			{
-				std::copy(begin(), end(), tmp);
+				std::memcpy(tmp, m_arr, sizeof(value_type)  * m_size);
 				m_alloc.deallocate(m_arr, m_capacity);
 			}
 			m_arr = tmp;
@@ -227,7 +233,7 @@ namespace ft
 			if (m_size >= m_capacity)
 				return;
 			pointer tmp = m_alloc.allocate(m_size);
-			std::copy(begin(), end(), tmp);
+			std::memcpy(tmp, m_arr, sizeof(value_type)  * m_size);
 			m_alloc.deallocate(m_arr, m_capacity);
 			m_arr = tmp;
 			m_capacity = m_size;
@@ -243,13 +249,14 @@ namespace ft
 			}
 			if (count > m_capacity) {
 				pointer tmp = m_alloc.allocate(count);
-				std::copy(begin(), end(), tmp);
+				std::memcpy(tmp, m_arr, sizeof(value_type) * m_size);
 				if (m_arr)
 					m_alloc.deallocate(m_arr, m_capacity);
 				m_arr = tmp;
 				m_capacity = count;
 			}
-			std::fill_n(m_arr + m_size, count - m_size, value);
+			for(size_type i = 0; i < count - m_size; ++i)
+				m_alloc.construct(m_arr + m_size + i, value);
 			m_size = count;
 		}
 
@@ -306,7 +313,7 @@ namespace ft
 		iterator erase(iterator pos)
 		{
 			m_alloc.destroy(&*pos);
-			std::memmove(&*pos, (&*pos) + 1, sizeof(T) * (m_size - (&*(pos + 1) - m_arr)));
+			std::memmove(&*pos, (&*pos) + 1, sizeof(value_type)  * (m_size - (&*(pos + 1) - m_arr)));
 			m_size--;
 			return pos;
 		}
@@ -314,7 +321,7 @@ namespace ft
 		{
 			for(iterator i = first; i != last; ++i)
 				m_alloc.destroy(&(*i));
-			std::memmove(&*first, &*last, sizeof(T) * (end() - last));
+			std::memmove(&*first, &*last, sizeof(value_type)  * (end() - last));
 			m_size -= last - first;
 			return first;
 		}
