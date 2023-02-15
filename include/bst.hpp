@@ -376,6 +376,8 @@ namespace ft
 //			return (const_iterator(t));
 //		}
 
+		allocator_type get_allocator() const { return m_alloc; }
+
 		// iterator
 		template<typename IterL, typename IterR>
 		friend bool operator==(const _iterator<IterL>& lhs, const _iterator<IterR>& rhs)

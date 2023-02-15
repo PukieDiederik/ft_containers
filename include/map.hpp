@@ -123,6 +123,7 @@ namespace ft
 
 		key_compare key_comp() const;
 		value_compare value_comp() const;
+		allocator_type get_allocator() const { return m_tree.get_allocator();}
 	};
 }
 

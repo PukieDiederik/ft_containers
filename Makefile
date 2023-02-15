@@ -1,7 +1,7 @@
 ## File stuff
 SHELL		=	/bin/zsh
 
-FNAMES		=	vector_test.cpp stack_test.cpp\
+FNAMES		=	vector_test.cpp stack_test.cpp map_test.cpp\
 				main.cpp
 
 SRCS		= $(addprefix $(SRCS_DIR)/,$(FNAMES))
