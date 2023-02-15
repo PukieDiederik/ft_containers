@@ -33,21 +33,26 @@ namespace ft
 		_TreeNode* left_most()
 		{
 			_TreeNode* tmp = this;
-			for (; tmp->left->isDummy(); tmp = tmp->left);
+			while (!tmp->isDummy() && !tmp->isLeaf())
+				tmp = (tmp->left->isDummy()) ? tmp->right : tmp->left;
 			return tmp;
 		}
 		_TreeNode* right_most()
 		{
 			_TreeNode* tmp = this;
-			for (; !tmp->right->isDummy(); tmp = tmp->right);
+			while (!tmp->isDummy() && !tmp->isLeaf())
+				tmp = (tmp->right->isDummy()) ? tmp->left : tmp->right;
 			return tmp;
 		}
 
 		inline bool isDummy() { return (!left && !right); }
+		inline bool isLeaf() { return !(left->isDummy() || right->isDummy()); }
 	};
 
-	template <typename T, typename Compare = std::less<T>, typename EqualsCompare = std::equal_to<T>,
-			  typename Allocator = std::allocator<T>, typename NodeAllocator = std::allocator<_TreeNode<T> > >
+	template <typename Key, typename T,
+			  typename Compare = std::less<Key>,
+			  typename Allocator = std::allocator<ft::pair<Key, T> >,
+			  typename NodeAllocator = std::allocator<_TreeNode<T> > >
 	class BST
 	{
 	private:
@@ -112,10 +117,11 @@ namespace ft
 		};
 
 	public:
-		typedef T				value_type;
-		typedef Compare			value_compare;
-		typedef EqualsCompare	value_equal_compare;
-		typedef Allocator		allocator_type;
+		typedef Key					key_type;
+		typedef T					mapped_type;
+		typedef ft::pair<Key, T>	value_type;
+		typedef Compare				value_compare;
+		typedef Allocator			allocator_type;
 
 		typedef typename Allocator::reference		reference;
 		typedef typename Allocator::const_reference	const_reference;
@@ -136,12 +142,10 @@ namespace ft
 	private:
 		typedef _TreeNode<T>	node_type;
 
-		size_type m_size;
-		Allocator m_alloc;
-		NodeAllocator m_node_alloc;
-
+		size_type 		m_size;
+		Allocator 		m_alloc;
+		NodeAllocator	m_node_alloc;
 		Compare 		comp;
-		EqualsCompare	ecomp;
 
 		node_type *m_root;
 
@@ -177,15 +181,14 @@ namespace ft
 
 	public:
 		// Constructors/Destructors
-		BST() :m_alloc(Allocator()), m_node_alloc(NodeAllocator()), m_size(0),
-						comp(Compare { }), ecomp(EqualsCompare { })
+		BST() :m_alloc(Allocator()), m_node_alloc(NodeAllocator()), m_size(0), comp(Compare { })
 		{
 			m_root = m_node_alloc.allocate(1);
 			m_node_alloc.construct(m_root, node_type(NULL));
 		}
-		explicit BST(const Compare& comp, const Allocator& alloc = Allocator());
+//		explicit BST(const Compare& comp, const Allocator& alloc = Allocator());
 		// TODO: iterator constructor
-		BST(const BST& copy);
+//		BST(const BST& copy);
 
 		~BST();
 
@@ -205,22 +208,32 @@ namespace ft
 		size_type max_size() const { return m_alloc.max_size(); }
 
 		// modifiers
-		void clear();
+		void clear()
+		{
+			for(iterator i = begin(), e = end(); i != e; ++i)
+			{
+				m_alloc.destroy(i.base()->value);
+				m_node_alloc.destroy(i.base()->left);
+				m_node_alloc.destroy(i.base()->right);
+			}
+			m_root = node_type(NULL);
+		}
 
 		ft::pair<iterator, bool> insert(const value_type& value)
 		{
 			// Basic BST insertion
 			node_type* cur = m_root;
-			while (!cur->isDummy() && !ecomp(cur->value, value))
+			while (!cur->isDummy() && cur->value.first != value.first)
 			{
-				if (comp(value, cur->value))
+				if (comp(value.first, cur->value.first))
 					cur = cur->left;
 				else
 					cur = cur->right;
 			}
-			if (ecomp(cur->value, value))
+			if (cur->value.first == value.first)
 				return ft::make_pair<iterator, bool>(iterator(cur), false);
 			add_value(cur, value);
+			++m_size;
 			return ft::make_pair<iterator, bool>(iterator(cur), true);
 		}
 
@@ -246,16 +259,16 @@ namespace ft
 				n->value = rl->value;
 				erase_helper(rl, rl->left, rl->right);
 			}
+			--m_size;
 		}
 
 		void swap(BST& other)
 		{
-			size_type tmp_size = other.m_size;
-			Allocator tmp_alloc = other.m_alloc;
-			NodeAllocator tmp_node_alloc = other.m_node_alloc;
-			Compare 	tmp_comp = other.comp;
-			EqualsCompare	tmp_ecomp = other.ecomp;
-			node_type *tmp_root = other.m_root;
+			size_type		tmp_size = other.m_size;
+			Allocator		tmp_alloc = other.m_alloc;
+			NodeAllocator	tmp_node_alloc = other.m_node_alloc;
+			Compare 		tmp_comp = other.comp;
+			node_type		*tmp_root = other.m_root;
 
 			other.m_size = m_size;
 			m_size = tmp_size;
@@ -267,21 +280,19 @@ namespace ft
 			m_node_alloc = tmp_node_alloc;
 
 			other.comp = comp;
-			other.ecomp = ecomp;
 			comp = tmp_comp;
-			ecomp = tmp_ecomp;
 
 			other.m_root = m_root;
 			m_root = tmp_root;
 		}
 
 		// lookup
-		iterator find(const value_type& v)
+		iterator find(const key_type& key)
 		{
 			node_type *n = m_root;
-			while (!n->isDummy() && ecomp(n->value, v))
+			while (!n->isDummy() && n->value.first == key)
 			{
-				if (comp(v, n->value))
+				if (comp(key, n->value->first))
 					n = n->left;
 				else
 					n = n->right;
@@ -290,12 +301,12 @@ namespace ft
 				return end();
 			return iterator(n);
 		}
-		const_iterator find(const value_type& v) const
+		const_iterator find(const key_type& key) const
 		{
 			const node_type *n = m_root;
-			while (!n->isDummy() && ecomp(n->value, v))
+			while (!n->isDummy() && n->value.first == key)
 			{
-				if (comp(v, n->value))
+				if (comp(key, n->value->first))
 					n = n->left;
 				else
 					n = n->right;
@@ -305,8 +316,65 @@ namespace ft
 			return const_iterator(n);
 		}
 
-		iterator lower_bound(const value_type& v);
-		iterator higher_bound(const value_type& v);
+		//finds the first node not less than k.
+		iterator lower_bound(const key_type& k)
+		{
+			node_type *n = m_root;
+			node_type *t = NULL; // top result so far
+			while (!n->isDummy())
+			{
+				if (comp(k, n->value->first))
+				{
+					if (!t || comp(n->value->first, t->value->first))
+						t = n->value->first;
+					n = n->left;
+				}
+				else
+					n = n->right;
+			}
+			if (!t)
+				return end();
+			return (iterator(t));
+		}
+		const_iterator lower_bound(const key_type& k) const
+		{
+			const node_type *n = m_root;
+			const node_type *t = NULL; // top result so far
+			while (!n->isDummy())
+			{
+				if (comp(k, n->value->first))
+				{
+					if (!t || comp(n->value->first, t->value->first))
+						t = n->value->first;
+					n = n->left;
+				}
+				else
+					n = n->right;
+			}
+			if (!t)
+				return end();
+			return (const_iterator(t));
+		}
+//		iterator upper_bound(const key_type& k);
+//		const_iterator upper_bound(const key_type& k) const
+//		{
+//			const node_type *n = m_root;
+//			const node_type *t = NULL; // top result so far
+//			while (!n->isDummy())
+//			{
+//				if (comp(k, n->value->first))
+//				{
+//					if ((k != n->value->first) && !t || comp(n->value->first, t->value->first) )
+//						t = n->value->first;
+//					n = n->left;
+//				}
+//				else
+//					n = n->right;
+//			}
+//			if (!t)
+//				return end();
+//			return (const_iterator(t));
+//		}
 
 		// iterator
 		template<typename IterL, typename IterR>
@@ -321,9 +389,9 @@ namespace ft
 		}
 	};
 
-	template <typename T, typename Compare = std::less<T>, typename EqualsCompare = std::equal_to<T>, typename Allocator = std::allocator<T>>
-	void swap(typename ft::BST<T, Compare, EqualsCompare, Allocator>& lhs,
-			  typename ft::BST<T, Compare, EqualsCompare, Allocator>& rhs)
+	template <typename Key, typename T, typename Compare = std::less<T>, typename Allocator = std::allocator<T>>
+	void swap(typename ft::BST<Key, T, Compare, Allocator>& lhs,
+			  typename ft::BST<Key, T, Compare, Allocator>& rhs)
 	{ lhs.swap(rhs); }
 }
 

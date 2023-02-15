@@ -110,16 +110,16 @@ namespace ft
 
 		size_type  count(const Key& key) const { }
 
-		iterator find(const Key& key) { }
-		const_iterator find(const Key& key) const { }
+		iterator find(const Key& key) { return m_tree.find(key); }
+		const_iterator find(const Key& key) const { return m_tree.find(key); }
 
 		ft::pair<iterator, iterator> equal_range(const Key& key) { }
 		ft::pair<const_iterator, const_iterator> equal_range(const Key& key) const { }
 
-		iterator lower_bound(const Key& key) { }
-		const_iterator lower_bound(const Key& key) const { }
-		iterator upper_bound(const Key& key) { }
-		const_iterator upper_bound(const Key& key) const { }
+		iterator lower_bound(const Key& key) { return m_tree.lower_bound(key); }
+		const_iterator lower_bound(const Key& key) const { return m_tree.lower_bound(key); }
+		iterator upper_bound(const Key& key) { return m_tree.upper_bound(key); }
+		const_iterator upper_bound(const Key& key) const { return m_tree.upper_bound(key); }
 
 		key_compare key_comp() const;
 		value_compare value_comp() const;
