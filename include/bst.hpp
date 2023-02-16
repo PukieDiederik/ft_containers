@@ -18,8 +18,8 @@ namespace ft
 		_TreeNode* left;
 		_TreeNode* right;
 
-		_TreeNode() : parent(NULL), left(NULL), right(NULL), value(NULL) { }
-		_TreeNode(_TreeNode* _parent) :parent(_parent), left(NULL), right(NULL), value(NULL) { }
+		_TreeNode() : value(NULL), parent(NULL), left(NULL), right(NULL) { }
+		_TreeNode(_TreeNode* _parent) :value(NULL), parent(_parent), left(NULL), right(NULL) { }
 		_TreeNode(const _TreeNode& copy) :value(copy.value), parent(copy.parent), left(copy.left), right(copy.right) { }
 
 		_TreeNode<T>& operator=(const _TreeNode<T>& copy)
@@ -52,18 +52,33 @@ namespace ft
 	template <typename Key, typename T,
 			  typename Compare = std::less<Key>,
 			  typename Allocator = std::allocator<ft::pair<Key, T> >,
-			  typename NodeAllocator = std::allocator<_TreeNode<T> > >
+			  typename NodeAllocator = std::allocator<_TreeNode<ft::pair<Key, T> > > >
 	class BST
 	{
+	public:
+		typedef Key					key_type;
+		typedef T					mapped_type;
+		typedef ft::pair<Key, T>	value_type;
+		typedef Compare				value_compare;
+		typedef Allocator			allocator_type;
+
 	private:
 		template<typename Base>
-		class _iterator : public ft::iterator<std::bidirectional_iterator_tag, T>
+		class _iterator : public ft::iterator<std::bidirectional_iterator_tag, value_type>
 		{
+		private:
+			typedef ft::iterator_traits<ft::iterator<std::bidirectional_iterator_tag, value_type> > m_traits;
 		protected:
 			Base m_base;
 
-
 		public:
+			//typedefs
+			typedef typename m_traits::value_type			value_type;
+			typedef typename m_traits::difference_type		difference_type;
+			typedef typename m_traits::pointer				pointer;
+			typedef typename m_traits::reference			reference;
+			typedef typename m_traits::iterator_category	iterator_category;
+
 			//constructors
 			_iterator() : m_base(NULL) { }
 			_iterator(Base base) : m_base(base) { }
@@ -117,12 +132,7 @@ namespace ft
 		};
 
 	public:
-		typedef Key					key_type;
-		typedef T					mapped_type;
-		typedef ft::pair<Key, T>	value_type;
-		typedef Compare				value_compare;
-		typedef Allocator			allocator_type;
-
+		typedef _TreeNode<value_type>	node_type;
 		typedef typename Allocator::reference		reference;
 		typedef typename Allocator::const_reference	const_reference;
 		typedef typename Allocator::pointer			pointer;
@@ -132,22 +142,21 @@ namespace ft
 		typedef std::size_t		size_type;
 		typedef std::ptrdiff_t	difference_type;
 
-		typedef _iterator<_TreeNode<T>* >				iterator;
-		typedef _iterator<const _TreeNode<T>* >			const_iterator;
+		typedef _iterator<node_type*>				iterator;
+		typedef _iterator<const node_type*>			const_iterator;
 		typedef ft::reverse_iterator<iterator>			reverse_iterator;
 		typedef ft::reverse_iterator<const_iterator>	const_reverse_iterator;
 
 
 
 	private:
-		typedef _TreeNode<T>	node_type;
 
 		size_type 		m_size;
 		Allocator 		m_alloc;
 		NodeAllocator	m_node_alloc;
-		Compare 		comp;
+		Compare 		m_comp;
 
-		node_type *m_root;
+		node_type* m_root;
 
 		void add_value(node_type* n, const value_type& value)
 		{
@@ -181,16 +190,23 @@ namespace ft
 
 	public:
 		// Constructors/Destructors
-		BST() :m_alloc(Allocator()), m_node_alloc(NodeAllocator()), m_size(0), comp(Compare { })
+		explicit BST(Compare comp = Compare(), Allocator alloc = Allocator(), NodeAllocator nalloc = NodeAllocator())
+			:m_size(0), m_alloc(alloc), m_node_alloc(nalloc), m_comp(comp)
 		{
 			m_root = m_node_alloc.allocate(1);
 			m_node_alloc.construct(m_root, node_type(NULL));
 		}
 //		explicit BST(const Compare& comp, const Allocator& alloc = Allocator());
 		// TODO: iterator constructor
-//		BST(const BST& copy);
+		BST(const BST& copy) // TODO: copy constructor
+			:m_size(copy.size()), m_alloc(copy.m_node_alloc), m_node_alloc(copy.m_node_alloc), m_comp(copy.m_comp)
+		{
+			(void)copy;
+			m_root = m_node_alloc.allocate(1);
+			m_node_alloc.construct(m_root, node_type(NULL));
+		}
 
-		~BST();
+		~BST() { }
 
 		iterator begin() { return iterator(m_root->left_most()); }
 		const_iterator begin() const { return const_iterator(m_root->left_most()); }
@@ -225,7 +241,7 @@ namespace ft
 			node_type* cur = m_root;
 			while (!cur->isDummy() && cur->value.first != value.first)
 			{
-				if (comp(value.first, cur->value.first))
+				if (m_comp(value.first, cur->value.first))
 					cur = cur->left;
 				else
 					cur = cur->right;
@@ -267,7 +283,7 @@ namespace ft
 			size_type		tmp_size = other.m_size;
 			Allocator		tmp_alloc = other.m_alloc;
 			NodeAllocator	tmp_node_alloc = other.m_node_alloc;
-			Compare 		tmp_comp = other.comp;
+			Compare 		tmp_comp = other.m_comp;
 			node_type		*tmp_root = other.m_root;
 
 			other.m_size = m_size;
@@ -279,8 +295,8 @@ namespace ft
 			other.m_node_alloc = m_node_alloc;
 			m_node_alloc = tmp_node_alloc;
 
-			other.comp = comp;
-			comp = tmp_comp;
+			other.m_comp = m_comp;
+			m_comp = tmp_comp;
 
 			other.m_root = m_root;
 			m_root = tmp_root;
@@ -292,7 +308,7 @@ namespace ft
 			node_type *n = m_root;
 			while (!n->isDummy() && n->value.first == key)
 			{
-				if (comp(key, n->value->first))
+				if (m_comp(key, n->value->first))
 					n = n->left;
 				else
 					n = n->right;
@@ -306,7 +322,7 @@ namespace ft
 			const node_type *n = m_root;
 			while (!n->isDummy() && n->value.first == key)
 			{
-				if (comp(key, n->value->first))
+				if (m_comp(key, n->value->first))
 					n = n->left;
 				else
 					n = n->right;
@@ -323,9 +339,9 @@ namespace ft
 			node_type *t = NULL; // top result so far
 			while (!n->isDummy())
 			{
-				if (comp(k, n->value->first))
+				if (m_comp(k, n->value->first))
 				{
-					if (!t || comp(n->value->first, t->value->first))
+					if (!t || m_comp(n->value->first, t->value->first))
 						t = n->value->first;
 					n = n->left;
 				}
@@ -342,9 +358,9 @@ namespace ft
 			const node_type *t = NULL; // top result so far
 			while (!n->isDummy())
 			{
-				if (comp(k, n->value->first))
+				if (m_comp(k, n->value->first))
 				{
-					if (!t || comp(n->value->first, t->value->first))
+					if (!t || m_comp(n->value->first, t->value->first))
 						t = n->value->first;
 					n = n->left;
 				}
@@ -391,7 +407,7 @@ namespace ft
 		}
 	};
 
-	template <typename Key, typename T, typename Compare = std::less<T>, typename Allocator = std::allocator<T>>
+	template <typename Key, typename T, typename Compare, typename Allocator>
 	void swap(typename ft::BST<Key, T, Compare, Allocator>& lhs,
 			  typename ft::BST<Key, T, Compare, Allocator>& rhs)
 	{ lhs.swap(rhs); }

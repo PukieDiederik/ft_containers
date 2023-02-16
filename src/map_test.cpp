@@ -1,11 +1,15 @@
+#include "map.hpp"
 #include "test.hpp"
 #include <iostream>
+
+#include <map>
 
 static void check_construction()
 {
 	std::cout << "\033[0;33m> Testing construction\033[0m" << std::endl;
 	{ // default
 		PRINT_CAT(15, "default");
+		ft::map<int, int> m;
 		std::cout << std::endl;
 	}
 	{ // iterator
