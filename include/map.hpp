@@ -69,23 +69,23 @@ namespace ft
 //		const T& at (const Key& key) const { }
 //		T& operator[](const Key& key) { }
 //
-//		iterator begin() { return m_tree.begin(); }
-//		const_iterator begin() const { return m_tree.begin(); }
-//		iterator end() { return m_tree.end(); }
-//		const_iterator end() const { return m_tree.end(); }
-//
-//		reverse_iterator rbegin() { return m_tree.rbegin(); }
-//		const_reverse_iterator rbegin() const { return m_tree.rbegin(); }
-//		reverse_iterator rend() { return m_tree.rend(); }
-//		const_reverse_iterator rend() const { return m_tree.rend(); }
-//
-//		bool empty() const { return m_tree.empty(); }
-//		size_type size() const { return m_tree.size(); }
-//		size_type max_size() const { return m_tree.max_size(); }
-//
-//		void clear() { m_tree.clear(); }
-//
-//		ft::pair<iterator, bool> insert ( const value_type& value) { }
+		iterator begin() { return m_tree.begin(); }
+		const_iterator begin() const { return m_tree.begin(); }
+		iterator end() { return m_tree.end(); }
+		const_iterator end() const { return m_tree.end(); }
+
+		reverse_iterator rbegin() { return m_tree.rbegin(); }
+		const_reverse_iterator rbegin() const { return m_tree.rbegin(); }
+		reverse_iterator rend() { return m_tree.rend(); }
+		const_reverse_iterator rend() const { return m_tree.rend(); }
+
+		bool empty() const { return m_tree.empty(); }
+		size_type size() const { return m_tree.size(); }
+		size_type max_size() const { return m_tree.max_size(); }
+
+		void clear() { m_tree.clear(); }
+
+		ft::pair<iterator, bool> insert ( const value_type& value) { return m_tree.insert(value); }
 //		iterator insert (iterator pos, const value_type& value) { }
 //		template <typename InputIt>
 //		void insert(InputIt first, InputIt last) { }

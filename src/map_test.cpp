@@ -10,6 +10,7 @@ static void check_construction()
 	{ // default
 		PRINT_CAT(15, "default");
 		ft::map<int, int> m;
+		m.insert(ft::pair<int, int>(3, 5));
 		std::cout << std::endl;
 	}
 	{ // iterator

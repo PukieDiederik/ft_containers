@@ -47,7 +47,7 @@ namespace ft
 		}
 
 		inline bool isDummy() { return (!left && !right); }
-		inline bool isLeaf() { return !(left->isDummy() || right->isDummy()); }
+		inline bool isLeaf() { return left->isDummy() && right->isDummy(); }
 	};
 
 	template <typename Key, typename T,
@@ -90,6 +90,7 @@ namespace ft
 			_iterator& operator=(const _iterator& copy) { m_base = copy.m_base; return *this;}
 
 
+			// TODO: remake this iterator
 			_iterator& operator++()
 			{
 				if (m_base->right->isDummy())
@@ -166,7 +167,7 @@ namespace ft
 			n->left = m_node_alloc.allocate(1);
 			n->right = m_node_alloc.allocate(1);
 			m_node_alloc.construct(n->left, node_type(n));
-			m_node_alloc.construct(n->left, node_type(n));
+			m_node_alloc.construct(n->right, node_type(n));
 		}
 
 		void erase_helper(node_type *n, node_type *lhs, node_type *rhs)
@@ -235,13 +236,13 @@ namespace ft
 				return ;
 			for(iterator i = begin(), e = end(); i != e; i = n)
 			{
+				n = i;
+				++n;
 				m_alloc.destroy(i.base()->value);
 				m_node_alloc.destroy(i.base()->left);
 				m_node_alloc.destroy(i.base()->right);
 				m_node_alloc.deallocate(i.base()->left, 1);
 				m_node_alloc.deallocate(i.base()->right, 1);
-				n = i;
-				++n;
 			}
 			m_root = m_node_alloc.allocate(1);
 			m_node_alloc.construct(m_root, node_type(NULL));
@@ -252,14 +253,14 @@ namespace ft
 		{
 			// Basic BST insertion
 			node_type* cur = m_root;
-			while (!cur->isDummy() && cur->value.first != value.first)
+			while (!cur->isDummy() && cur->value->first != value.first)
 			{
-				if (m_comp(value.first, cur->value.first))
+				if (m_comp(value, *cur->value))
 					cur = cur->left;
 				else
 					cur = cur->right;
 			}
-			if (cur->value.first == value.first)
+			if (!cur->isDummy())
 				return ft::make_pair<iterator, bool>(iterator(cur), false);
 			add_value(cur, value);
 			++m_size;
