@@ -6,6 +6,7 @@
 #include "vector.hpp"
 #include <functional>
 #include <memory>
+#include <iostream>
 
 namespace ft
 {
@@ -82,11 +83,11 @@ namespace ft
 			//constructors
 			_iterator() : m_base(NULL) { }
 			_iterator(Base base) : m_base(base) { }
-			_iterator(const _iterator& copy) : m_base(copy) { }
+			_iterator(const _iterator& copy) : m_base(copy.m_base) { }
 
 			~_iterator() { }
 
-			_iterator& operator=(const _iterator& copy) { m_base = copy.m_base; }
+			_iterator& operator=(const _iterator& copy) { m_base = copy.m_base; return *this;}
 
 
 			_iterator& operator++()
@@ -154,7 +155,7 @@ namespace ft
 		size_type 		m_size;
 		Allocator 		m_alloc;
 		NodeAllocator	m_node_alloc;
-		Compare 		m_comp;
+		const Compare 		m_comp;
 
 		node_type* m_root;
 
@@ -191,12 +192,10 @@ namespace ft
 	public:
 		// Constructors/Destructors
 		explicit BST(Compare comp = Compare(), Allocator alloc = Allocator(), NodeAllocator nalloc = NodeAllocator())
-			:m_size(0), m_alloc(alloc), m_node_alloc(nalloc), m_comp(comp)
+			:m_size(0), m_alloc(alloc), m_node_alloc(nalloc), m_comp(comp), m_root(m_node_alloc.allocate(1))
 		{
-			m_root = m_node_alloc.allocate(1);
 			m_node_alloc.construct(m_root, node_type(NULL));
 		}
-//		explicit BST(const Compare& comp, const Allocator& alloc = Allocator());
 		// TODO: iterator constructor
 		BST(const BST& copy) // TODO: copy constructor
 			:m_size(copy.size()), m_alloc(copy.m_node_alloc), m_node_alloc(copy.m_node_alloc), m_comp(copy.m_comp)
@@ -206,12 +205,17 @@ namespace ft
 			m_node_alloc.construct(m_root, node_type(NULL));
 		}
 
-		~BST() { }
+		~BST()
+		{
+			clear();
+			m_node_alloc.destroy(m_root);
+			m_node_alloc.deallocate(m_root, 1);
+		}
 
 		iterator begin() { return iterator(m_root->left_most()); }
 		const_iterator begin() const { return const_iterator(m_root->left_most()); }
-		iterator end() { return iterator(NULL); }
-		const_iterator end() const { return const_iterator(NULL); }
+		iterator end() { return iterator(m_root->isDummy() ? m_root : m_root->right_most()->right); }
+		const_iterator end() const { return const_iterator(m_root->isDummy() ? m_root : m_root->right_most()->right); }
 
 		reverse_iterator rbegin() { return reverse_iterator(end()); }
 		const_reverse_iterator rbegin() const { return const_reverse_iterator (end()); }
@@ -226,13 +230,22 @@ namespace ft
 		// modifiers
 		void clear()
 		{
-			for(iterator i = begin(), e = end(); i != e; ++i)
+			iterator n;
+			if (m_root->isDummy())
+				return ;
+			for(iterator i = begin(), e = end(); i != e; i = n)
 			{
 				m_alloc.destroy(i.base()->value);
 				m_node_alloc.destroy(i.base()->left);
 				m_node_alloc.destroy(i.base()->right);
+				m_node_alloc.deallocate(i.base()->left, 1);
+				m_node_alloc.deallocate(i.base()->right, 1);
+				n = i;
+				++n;
 			}
-			m_root = node_type(NULL);
+			m_root = m_node_alloc.allocate(1);
+			m_node_alloc.construct(m_root, node_type(NULL));
+			m_size = 0;
 		}
 
 		ft::pair<iterator, bool> insert(const value_type& value)
