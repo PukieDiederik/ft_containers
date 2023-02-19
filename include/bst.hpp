@@ -74,11 +74,11 @@ namespace ft
 
 		public:
 			//typedefs
-			typedef typename m_traits::value_type			value_type;
-			typedef typename m_traits::difference_type		difference_type;
-			typedef typename m_traits::pointer				pointer;
-			typedef typename m_traits::reference			reference;
-			typedef typename m_traits::iterator_category	iterator_category;
+//			typedef typename m_traits::value_type			value_type;
+//			typedef typename m_traits::difference_type		difference_type;
+//			typedef typename m_traits::pointer				pointer;
+//			typedef typename m_traits::reference			reference;
+//			typedef typename m_traits::iterator_category	iterator_category;
 
 			//constructors
 			_iterator() : m_base(NULL) { }
@@ -93,17 +93,52 @@ namespace ft
 			// TODO: remake this iterator
 			_iterator& operator++()
 			{
-				if (m_base->right->isDummy())
+				if (m_base->isDummy())
+				{
 					m_base = m_base->parent;
+					return *this;
+				}
+				if (!m_base->parent && m_base->right->isDummy())
+				{
+					m_base = m_base->right;
+					return *this;
+				}
+				if (m_base->right->isDummy())
+				{
+					// if this node is the left side
+					if (m_base->parent->left == m_base)
+					{
+						m_base = m_base->parent;
+						return *this;
+					}
+					else // if the node is the right side
+					{
+						Base tmp = m_base;
+						while (tmp != tmp->parent->left)
+						{
+							tmp = tmp->parent;
+							if (!tmp->parent)
+							{
+								m_base = m_base->right;
+								return *this;
+							}
+						}
+						m_base = tmp->parent;
+						return *this;
+					}
+				}
 				else
 				{
-					m_base = m_base->parent->right;
-					if (!m_base->isDummy())
-						return *this;
-					for (; !m_base->left->isDummy(); m_base = m_base->left);
+					Base tmp = m_base->right;
+					while (!tmp->left->isDummy())
+					{
+						tmp = tmp->left;
+					}
+					m_base = tmp;
+					return *this;
 				}
-				return *this;
 			}
+
 			_iterator& operator++(int)
 			{
 				Base tmp = m_base;
@@ -113,21 +148,61 @@ namespace ft
 
 			_iterator& operator--()
 			{
-				if ((m_base->left->isDummy() && m_base->right->isDummy()) || !m_base->right->isDummy())
+				if (m_base->isDummy())
+				{
 					m_base = m_base->parent;
-				else
+					return *this;
+				}
+				if (!m_base->parent && m_base->left->isDummy())
 				{
 					m_base = m_base->left;
-					for (; !m_base->right->isDummy(); m_base = m_base->right);
+					return *this;
 				}
-				return *this;
-
+				if (m_base->left->isDummy())
+				{
+					// if this node is the right side
+					if (m_base->parent->right == m_base)
+					{
+						m_base = m_base->parent;
+						return *this;
+					}
+					else // if the node is the left side
+					{
+						Base tmp = m_base;
+						while (tmp != tmp->parent->right)
+						{
+							tmp = tmp->parent;
+							if (!tmp->parent)
+							{
+								m_base = m_base->left;
+								return *this;
+							}
+						}
+						m_base = tmp->parent;
+						return *this;
+					}
+				}
+				else
+				{
+					Base tmp = m_base->left;
+					while (!tmp->right->isDummy())
+					{
+						tmp = tmp->right;
+					}
+					m_base = tmp;
+					return *this;
+				}
 			}
 			_iterator& operator--(int)
 			{
 				Base tmp = m_base;
 				operator--();
 				return tmp;
+			}
+
+			value_type& operator* ()
+			{
+				return *m_base->value;
 			}
 
 			const Base& base() const { return m_base; }
@@ -231,21 +306,24 @@ namespace ft
 		// modifiers
 		void clear()
 		{
-			iterator n;
-			if (m_root->isDummy())
-				return ;
-			for(iterator i = begin(), e = end(); i != e; i = n)
+			node_type* i = m_root->left_most();
+			while (i != NULL)
 			{
-				n = i;
-				++n;
-				m_alloc.destroy(i.base()->value);
-				m_node_alloc.destroy(i.base()->left);
-				m_node_alloc.destroy(i.base()->right);
-				m_node_alloc.deallocate(i.base()->left, 1);
-				m_node_alloc.deallocate(i.base()->right, 1);
+				m_alloc.destroy(i->value);
+				m_alloc.deallocate(i->value, 1);
+				m_node_alloc.destroy(i->left);
+				m_node_alloc.deallocate(i->right, 1);
+				m_node_alloc.destroy(i->left);
+				m_node_alloc.deallocate(i->left, 1);
+
+				if (i->parent && i->parent->right != i && !i->parent->right->isDummy())
+					i = i->parent->right->left_most();
+				else
+					i = i->parent;
 			}
-			m_root = m_node_alloc.allocate(1);
-			m_node_alloc.construct(m_root, node_type(NULL));
+			m_root->value = NULL;
+			m_root->right = NULL;
+			m_root->left = NULL;
 			m_size = 0;
 		}
 

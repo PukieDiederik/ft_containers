@@ -61,7 +61,7 @@ namespace ft
 //			 const key_compare& comp = key_compare(),
 //			 const allocator_type& alloc = allocator_type()) { }
 //		map (const map& copy) { }
-//		~map() { }
+		~map() { }
 //
 //		map& operator=(const map& copy) { m_tree = copy.m_tree; return *this; }
 //

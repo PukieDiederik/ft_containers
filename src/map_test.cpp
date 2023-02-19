@@ -8,9 +8,35 @@ static void check_construction()
 {
 	std::cout << "\033[0;33m> Testing construction\033[0m" << std::endl;
 	{ // default
-		PRINT_CAT(15, "default");
+//		PRINT_CAT(15, "default");
 		ft::map<int, int> m;
-		m.insert(ft::pair<int, int>(3, 5));
+		m.insert(ft::pair<int, int>(8, 8));
+
+		m.insert(ft::pair<int, int>(4, 4));
+		m.insert(ft::pair<int, int>(12, 12));
+
+		m.insert(ft::pair<int, int>(2, 2));
+		m.insert(ft::pair<int, int>(6, 6));
+		m.insert(ft::pair<int, int>(10, 10));
+		m.insert(ft::pair<int, int>(14, 14));
+
+		m.insert(ft::pair<int, int>(1, 1));
+		m.insert(ft::pair<int, int>(3, 3));
+		m.insert(ft::pair<int, int>(5, 5));
+		m.insert(ft::pair<int, int>(7, 7));
+		m.insert(ft::pair<int, int>(9, 9));
+		m.insert(ft::pair<int, int>(11, 11));
+		m.insert(ft::pair<int, int>(13, 13));
+		m.insert(ft::pair<int, int>(15, 15));
+
+//		ft::map<int,int>::iterator i = m.end();
+//		std::cout << (*(--i)).first << std::endl;
+
+		ft::map<int, int>::reverse_iterator i = m.rbegin(), e = m.rend();
+		for (ft::map<int, int>::reverse_iterator i = m.rbegin(), e = m.rend(); i != e; ++i)
+		{
+			std::cout << (*i).first << " ";
+		}
 		std::cout << std::endl;
 	}
 	{ // iterator
