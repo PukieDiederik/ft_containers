@@ -8,48 +8,81 @@ static void check_construction()
 {
 	std::cout << "\033[0;33m> Testing construction\033[0m" << std::endl;
 	{ // default
-//		PRINT_CAT(15, "default");
-		ft::map<int, int> m;
-		m.insert(ft::pair<int, int>(8, 8));
-
-		m.insert(ft::pair<int, int>(4, 4));
-		m.insert(ft::pair<int, int>(12, 12));
-
-		m.insert(ft::pair<int, int>(2, 2));
-		m.insert(ft::pair<int, int>(6, 6));
-		m.insert(ft::pair<int, int>(10, 10));
-		m.insert(ft::pair<int, int>(14, 14));
-
-		m.insert(ft::pair<int, int>(1, 1));
-		m.insert(ft::pair<int, int>(3, 3));
-		m.insert(ft::pair<int, int>(5, 5));
-		m.insert(ft::pair<int, int>(7, 7));
-		m.insert(ft::pair<int, int>(9, 9));
-		m.insert(ft::pair<int, int>(11, 11));
-		m.insert(ft::pair<int, int>(13, 13));
-		m.insert(ft::pair<int, int>(15, 15));
-
-//		ft::map<int,int>::iterator i = m.end();
-//		std::cout << (*(--i)).first << std::endl;
-
-		ft::map<int, int>::reverse_iterator i = m.rbegin(), e = m.rend();
-		for (ft::map<int, int>::reverse_iterator i = m.rbegin(), e = m.rend(); i != e; ++i)
-		{
-			std::cout << (*i).first << " ";
+		PRINT_CAT(15, "default");
+		ft::map<int,int> m;
+		if (m.size() != 0 || !m.empty()) {
+			PRINT_ERR("Did not construct an empty map");
 		}
-		std::cout << std::endl;
+		else
+		std::cout << OK_MSG <<  std::endl;
 	}
 	{ // iterator
-		PRINT_CAT(15, "copy");
-		std::cout << std::endl;
+		PRINT_CAT(15, "iterator");
+		ft::pair<int,int> arr[] = {ft::make_pair(5, 5),
+								   ft::make_pair(9, 9),
+								   ft::make_pair(3, 3)};
+		ft::map<int,int> m(arr + 0, arr + 3);
+		if (m.size() != 3 || *(m.begin().base()->value) != arr[2]){
+			PRINT_ERR("Could not construct with iterator");
+		}
+		else
+			std::cout << OK_MSG;
+
+		ft::map<int,int> n(arr + 0, arr + 2);
+		if (n.size() != 2 || *(n.begin().base()->value) != arr[0]){
+			PRINT_ERR("Could not construct with iterator");
+		}
+		else
+			std::cout << OK_MSG;
+		ft::map<int, int> o(n.begin(), n.end());
+		if (o != n){
+			PRINT_ERR("Could not construct with iterator");
+		}
+		else
+			std::cout << OK_MSG << std::endl;
 	}
 	{ // copy
-		PRINT_CAT(15, "iterator");
-		std::cout << std::endl;
+		PRINT_CAT(15, "copy");
+		ft::pair<int,int> arr[] = {ft::make_pair(5, 5),
+								   ft::make_pair(9, 9),
+								   ft::make_pair(3, 3)};
+		ft::map<int,int> m(arr + 0, arr + 3);
+		ft::map<int,int> c(m);
+		if (c != m){
+			PRINT_ERR("Could not construct using another map");
+		}
+		else
+			std::cout << OK_MSG;
+
+		m.clear();
+		ft::map<int,int> d(m);
+		if (d != m){
+			PRINT_ERR("Could not construct using another map");
+		}
+		else
+			std::cout << OK_MSG << std::endl;
 	}
 	{ // copy-assignment
 		PRINT_CAT(15, "copy-assignment");
-		std::cout << std::endl;
+		ft::pair<int,int> arr[] = {ft::make_pair(5, 5),
+								   ft::make_pair(9, 9),
+								   ft::make_pair(3, 3)};
+		ft::map<int,int> m(arr + 0, arr + 3);
+		ft::map<int,int> n;
+
+		n = m;
+		if (n != m){
+			PRINT_ERR("Could not copy map");
+		}
+		else
+			std::cout << OK_MSG;
+
+		n = ft::map<int, int>(arr + 0, arr + 2);
+		if (n.size() != 2){
+			PRINT_ERR("Could not copy map");
+		}
+		else
+			std::cout << OK_MSG << std::endl;
 	}
 }
 

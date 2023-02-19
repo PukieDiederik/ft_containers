@@ -7,6 +7,7 @@
 #include <functional>
 #include <memory>
 #include <iostream>
+#include <queue>
 
 namespace ft
 {
@@ -46,8 +47,23 @@ namespace ft
 			return tmp;
 		}
 
-		inline bool isDummy() { return (!left && !right); }
-		inline bool isLeaf() { return left->isDummy() && right->isDummy(); }
+		const _TreeNode* left_most() const
+		{
+			_TreeNode* tmp = this;
+			while (!tmp->isDummy() && !tmp->isLeaf())
+				tmp = (tmp->left->isDummy()) ? tmp->right : tmp->left;
+			return tmp;
+		}
+		const _TreeNode* right_most() const
+		{
+			_TreeNode* tmp = this;
+			while (!tmp->isDummy() && !tmp->isLeaf())
+				tmp = (tmp->right->isDummy()) ? tmp->left : tmp->right;
+			return tmp;
+		}
+
+		inline bool isDummy() const { return (!left && !right); }
+		inline bool isLeaf() const { return left->isDummy() && right->isDummy(); }
 	};
 
 	template <typename Key, typename T,
@@ -89,15 +105,8 @@ namespace ft
 
 			_iterator& operator=(const _iterator& copy) { m_base = copy.m_base; return *this;}
 
-
-			// TODO: remake this iterator
 			_iterator& operator++()
 			{
-				if (m_base->isDummy())
-				{
-					m_base = m_base->parent;
-					return *this;
-				}
 				if (!m_base->parent && m_base->right->isDummy())
 				{
 					m_base = m_base->right;
@@ -272,13 +281,26 @@ namespace ft
 		{
 			m_node_alloc.construct(m_root, node_type(NULL));
 		}
-		// TODO: iterator constructor
+
 		BST(const BST& copy) // TODO: copy constructor
-			:m_size(copy.size()), m_alloc(copy.m_node_alloc), m_node_alloc(copy.m_node_alloc), m_comp(copy.m_comp)
+			:m_size(0), m_alloc(copy.m_node_alloc), m_node_alloc(copy.m_node_alloc), m_comp(copy.m_comp)
 		{
-			(void)copy;
 			m_root = m_node_alloc.allocate(1);
 			m_node_alloc.construct(m_root, node_type(NULL));
+
+			if (copy.empty())
+				return;
+			std::queue<node_type*> q;
+			q.push(copy.m_root);
+			while (!q.empty())
+			{
+				insert(*q.front()->value);
+				if (!q.front()->left->isDummy())
+					q.push(q.front()->left);
+				if (!q.front()->right->isDummy())
+					q.push(q.front()->right);
+				q.pop();
+			}
 		}
 
 		~BST()
@@ -288,10 +310,62 @@ namespace ft
 			m_node_alloc.deallocate(m_root, 1);
 		}
 
-		iterator begin() { return iterator(m_root->left_most()); }
-		const_iterator begin() const { return const_iterator(m_root->left_most()); }
-		iterator end() { return iterator(m_root->isDummy() ? m_root : m_root->right_most()->right); }
-		const_iterator end() const { return const_iterator(m_root->isDummy() ? m_root : m_root->right_most()->right); }
+		BST& operator=(const BST& copy)
+		{
+			clear();
+			if (copy.empty())
+				return *this;
+			std::queue<node_type*> q;
+			q.push(copy.m_root);
+			while (!q.empty())
+			{
+				insert(*q.front()->value);
+				if (!q.front()->left->isDummy())
+					q.push(q.front()->left);
+				if (!q.front()->right->isDummy())
+					q.push(q.front()->right);
+				q.pop();
+			}
+			return *this;
+		}
+
+		// Iterators
+		iterator begin()
+		{
+			node_type* i = m_root;
+			while(!i->isDummy() && !i->left->isDummy())
+			{
+				i = i->left;
+			}
+			return iterator(i);
+		}
+		const_iterator begin() const
+		{
+			const node_type* i = m_root;
+			while(!i->isDummy() && !i->left->isDummy())
+			{
+				i = i->left;
+			}
+			return const_iterator(i);
+		}
+		iterator end()
+		{
+			node_type* i = m_root;
+			while(!i->isDummy())
+			{
+				i = i->right;
+			}
+			return iterator(i);
+		}
+		const_iterator end() const
+		{
+			const node_type* i = m_root;
+			while(!i->isDummy())
+			{
+				i = i->right;
+			}
+			return const_iterator(i);
+		}
 
 		reverse_iterator rbegin() { return reverse_iterator(end()); }
 		const_reverse_iterator rbegin() const { return const_reverse_iterator (end()); }
@@ -484,6 +558,9 @@ namespace ft
 //			return (const_iterator(t));
 //		}
 
+		node_type* base() { return m_root; }
+		const node_type* base() const { return m_root; }
+
 		allocator_type get_allocator() const { return m_alloc; }
 
 		// iterator
@@ -498,6 +575,8 @@ namespace ft
 			return lhs.base() != rhs.base();
 		}
 	};
+
+//	bool operator== ()
 
 	template <typename Key, typename T, typename Compare, typename Allocator>
 	void swap(typename ft::BST<Key, T, Compare, Allocator>& lhs,

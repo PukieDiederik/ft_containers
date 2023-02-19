@@ -435,7 +435,8 @@ namespace ft
 	{ return !(lhs < rhs); }
 
 	template<class T, class Alloc>
-	void swap(ft::vector<T, Alloc>& x, ft::vector<T, Alloc>& y);
+	void swap(ft::vector<T, Alloc>& x, ft::vector<T, Alloc>& y)
+	{ x.swap(y); }
 }
 
 #endif
