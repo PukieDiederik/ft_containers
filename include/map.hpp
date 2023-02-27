@@ -40,7 +40,7 @@ namespace ft
 			}
 		};
 
-		typedef BST<key_type, mapped_type, value_comp, Allocator> tree_type;
+		typedef BST<key_type, mapped_type, Compare, Allocator> tree_type;
 		//values
 		tree_type m_tree;
 
@@ -95,17 +95,40 @@ namespace ft
 		void clear() { m_tree.clear(); }
 
 		ft::pair<iterator, bool> insert ( const value_type& value) { return m_tree.insert(value); }
+		iterator insert(iterator position, const value_type& value) { (void)position; return m_tree.insert(value).first; }
+		template <typename InputIt>
+		void insert(InputIt first, InputIt last)
+		{
+			for(; first != last; ++first)
+				m_tree.insert(*first);
+		}
 //
-//		iterator erase(iterator pos);
-//		iterator erase(iterator first, iterator last);
-//		size_type erase(const Key& key);
-//
-//		void swap( map& other) { m_tree.swap(other.m_tree); }
+		iterator erase(iterator pos) { return m_tree.erase(pos); }
+		iterator erase(iterator first, iterator last)
+		{
+			iterator next;
+			for(; first != last; first = next) {
+				next = first;
+				++next;
+				m_tree.erase(first);
+			}
+			return last;
+		}
+		size_type erase(const Key& key)
+		{
+			iterator i = m_tree.find(key);
+			if (i == m_tree.end())
+				return 0;
+			m_tree.erase(i);
+			return 1;
+		}
+
+		void swap( map& other) { m_tree.swap(other.m_tree); }
 //
 //		size_type  count(const Key& key) const { }
 //
-//		iterator find(const Key& key) { return m_tree.find(key); }
-//		const_iterator find(const Key& key) const { return m_tree.find(key); }
+		iterator find(const Key& key) { return m_tree.find(key); }
+		const_iterator find(const Key& key) const { return m_tree.find(key); }
 //
 //		ft::pair<iterator, iterator> equal_range(const Key& key) { }
 //		ft::pair<const_iterator, const_iterator> equal_range(const Key& key) const { }

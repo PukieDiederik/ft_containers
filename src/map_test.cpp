@@ -2,8 +2,6 @@
 #include "test.hpp"
 #include <iostream>
 
-#include <map>
-
 static void check_construction()
 {
 	std::cout << "\033[0;33m> Testing construction\033[0m" << std::endl;
@@ -156,25 +154,128 @@ static void check_capacity()
 static void check_modifier()
 {
 	std::cout << "\033[0;33m> Testing modifiers\033[0m" << std::endl;
+	ft::pair<int,int> arr[] = { ft::pair<int,int>(3,3),
+							    ft::pair<int,int>(7,7),
+							    ft::pair<int,int>(1,1),
+							    ft::pair<int,int>(15,15),
+							    ft::pair<int,int>(123,123),
+							    ft::pair<int,int>(-6,-6),
+							    ft::pair<int,int>(9,9)};
 	{ // insert
 		PRINT_CAT(15, "insert");
-		std::cout << std::endl;
+
+		ft::map<int, int> m(arr, arr + 7);
+		ft::pair<ft::map<int, int>::iterator, bool> i;
+
+		i = m.insert(ft::pair<int,int>(2,2));
+		if (m.size() != 8 || (*(i.first)).second != 2 || !i.second) {
+			PRINT_ERR("Did not insert value correctly or did not return correct value");
+		}
+		else
+			std::cout << OK_MSG;
+		i = m.insert(ft::pair<int,int>(2,2));
+		if (m.size() != 8 || (*(i.first)).second != 2 || i.second) {
+			PRINT_ERR("Did return correctly with duplicate");
+		}
+		else
+			std::cout << OK_MSG;
+
+		i.first = m.insert(i.first, ft::pair<int,int>(19,19));
+		if (m.size() != 9 || (*(i.first)).second != 19) {
+			PRINT_ERR("Did not insert correctly with hint");
+		}
+		else
+			std::cout << OK_MSG;
+		i.first = m.insert(i.first, ft::pair<int,int>(19,19));
+		if (m.size() != 9 || (*(i.first)).second != 19) {
+			PRINT_ERR("Did not return correct value when trying to insert 19");
+		}
+		else
+			std::cout << OK_MSG;
+
+		ft::pair<int, int> arr2[] = {ft::pair<int,int>(13,13),
+									 ft::pair<int,int>(-6,-6),
+									 ft::pair<int,int>(-5,-5),
+									 ft::pair<int,int>(-3,-3)};
+		m.insert(arr2, arr2 + 4);
+		if (m.size() != 12) {
+			PRINT_ERR("Did not insert correctly with iterators");
+		}
+		else
+			std::cout << OK_MSG << std::endl;
 	}
-	{ // clear
+	{ //
 		PRINT_CAT(15, "clear");
-		std::cout << std::endl;
+		ft::map<int, int> m(arr, arr + 7);
+		m.clear();
+		if (m.size() != 0 || !m.empty()) {
+			PRINT_ERR("Did not clear correctly");
+		}
+		else
+			std::cout << OK_MSG;
+
+		m.clear();
+		std::cout << OK_MSG; // Checks for errors with clearing an empty map
+
+		m.insert(ft::pair<int, int>(3,5));
+		m.clear();
+		if (m.size() != 0 || !m.empty()) {
+			PRINT_ERR("Did not clear correctly");
+		}
+		else
+			std::cout << OK_MSG << std::endl;
 	}
 	{ // erase
 		PRINT_CAT(15, "erase");
-		std::cout << std::endl;
+		ft::map<int,int> m(arr, arr + 7);
+		ft::map<int, int>::iterator i = m.find(15);
+
+		m.erase(i);
+		if (m.find(15) != m.end() || m.size() != 6) {
+			PRINT_ERR("Could not erase element using an iterator");
+		}
+		else
+			std::cout << OK_MSG;
+		m.erase(15); // shouldn't crash
+		std::cout << OK_MSG;
+
+		m.erase(3);
+		if (m.find(3) != m.end() || m.size() != 5) {
+			PRINT_ERR("Could not erase element using a key");
+		}
+		else
+			std::cout << OK_MSG;
+
+		m.erase(m.begin(), m.end());
+		if (!m.empty()) {
+			PRINT_ERR("Could not erase every element using a range");
+		}
+		else
+			std::cout << OK_MSG << std::endl;
 	}
 	{ // swap
 		PRINT_CAT(15, "swap");
-		std::cout << std::endl;
+		ft::map<int,int> m1(arr, arr + 3);
+		ft::map<int,int> m2(arr + 3, arr + 7);
+
+		m1.swap(m2);
+		if (m1.size() != 4 || m2.size() != 3 || m1.begin()->second != -6  || m2.begin()->second != 1){
+			PRINT_ERR("Could not swap");
+		}
+		else
+			std::cout << OK_MSG << std::endl;
 	}
 	{ // std::swap
 		PRINT_CAT(15, "std::swap");
-		std::cout << std::endl;
+		ft::map<int,int> m1(arr, arr + 3);
+		ft::map<int,int> m2(arr + 3, arr + 7);
+
+		std::swap(m1, m2);
+		if (m1.size() != 4 || m2.size() != 3 || m1.begin()->second != -6  || m2.begin()->second != 1){
+			PRINT_ERR("Could not swap");
+		}
+		else
+			std::cout << OK_MSG << std::endl;
 	}
 }
 

@@ -214,6 +214,11 @@ namespace ft
 				return *m_base->value;
 			}
 
+			const value_type* operator-> () const
+			{
+				return m_base->value;
+			}
+
 			const Base& base() const { return m_base; }
 		};
 
@@ -266,12 +271,13 @@ namespace ft
 			}
 			else // base is root in this case
 				m_root = lhs;
+			lhs->parent = n->parent;
 			// removes dummy node
 			m_node_alloc.destroy(rhs);
-			m_node_alloc.deallocate(rhs);
+			m_node_alloc.deallocate(rhs, 1);
 			// removes base node
 			m_node_alloc.destroy(n);
-			m_node_alloc.deallocate(n);
+			m_node_alloc.deallocate(n, 1);
 		}
 
 	public:
@@ -407,7 +413,7 @@ namespace ft
 			node_type* cur = m_root;
 			while (!cur->isDummy() && cur->value->first != value.first)
 			{
-				if (m_comp(value, *cur->value))
+				if (m_comp(value.first, cur->value->first))
 					cur = cur->left;
 				else
 					cur = cur->right;
@@ -419,29 +425,64 @@ namespace ft
 			return ft::make_pair<iterator, bool>(iterator(cur), true);
 		}
 
-		void erase(iterator pos)
+		iterator erase(iterator pos)
 		{
 			node_type* n = pos.base();
 
 			if (n->isDummy())
-				return;
+				return pos;
+			iterator next = ++pos;
 			m_alloc.destroy(n->value);
-			m_alloc.deallocate(n->value);
-			// Case only 1 left node or no child nodes
-			if (n->right->isDummy())
-				erase_helper(n, n->left, n->right);
-			// Case only right node exists
-			else if (n->left->isDummy() && !n->right->isDummy())
+			m_alloc.deallocate(n->value, 1);
+
+			// Case only right node exists or no child nodes
+			if (n->left->isDummy())
 				erase_helper(n, n->right, n->left);
+			// Case only 1 left node
+			else if (n->right->isDummy())
+				erase_helper(n, n->left, n->right);
 			// Case both nodes exist
 			else
 			{
-				node_type* rl = n->right->left_most();
+				node_type* rl = n->right;
+				while (!rl->left->isDummy())
+					rl = rl->left;
 
-				n->value = rl->value;
-				erase_helper(rl, rl->left, rl->right);
+				//first detach 'rl'
+				if (rl->parent->right == rl)
+					rl->parent->right = rl->right;
+				else
+					rl->parent->left = rl->right;
+				rl->right->parent = rl->parent;
+
+				//delete dummy node at rl
+				m_node_alloc.destroy(rl->left);
+				m_node_alloc.deallocate(rl->left, 1);
+
+				//detach n //attach rl
+				if (n->parent)
+				{
+					if (n->parent->left == n)
+						n->parent->left = rl;
+					else
+						n->parent->right = rl;
+				}
+				else
+					m_root = rl;
+
+				n->left->parent = rl;
+				n->right->parent = rl;
+
+				rl->parent = n->parent;
+				rl->left = n->left;
+				rl->right = n->right;
+
+				//delete n
+				m_node_alloc.destroy(n);
+				m_node_alloc.deallocate(n, 1);
 			}
 			--m_size;
+			return next;
 		}
 
 		void swap(BST& other)
@@ -449,7 +490,6 @@ namespace ft
 			size_type		tmp_size = other.m_size;
 			Allocator		tmp_alloc = other.m_alloc;
 			NodeAllocator	tmp_node_alloc = other.m_node_alloc;
-			Compare 		tmp_comp = other.m_comp;
 			node_type		*tmp_root = other.m_root;
 
 			other.m_size = m_size;
@@ -461,9 +501,6 @@ namespace ft
 			other.m_node_alloc = m_node_alloc;
 			m_node_alloc = tmp_node_alloc;
 
-			other.m_comp = m_comp;
-			m_comp = tmp_comp;
-
 			other.m_root = m_root;
 			m_root = tmp_root;
 		}
@@ -472,7 +509,7 @@ namespace ft
 		iterator find(const key_type& key)
 		{
 			node_type *n = m_root;
-			while (!n->isDummy() && n->value.first == key)
+			while (!n->isDummy() && n->value->first != key)
 			{
 				if (m_comp(key, n->value->first))
 					n = n->left;
@@ -486,7 +523,7 @@ namespace ft
 		const_iterator find(const key_type& key) const
 		{
 			const node_type *n = m_root;
-			while (!n->isDummy() && n->value.first == key)
+			while (!n->isDummy() && n->value->first != key)
 			{
 				if (m_comp(key, n->value->first))
 					n = n->left;

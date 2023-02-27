@@ -24,6 +24,7 @@ namespace ft
 		{
 			first = pr.first;
 			second = pr.second;
+			return *this;
 		}
 	};
 
