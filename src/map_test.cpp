@@ -120,22 +120,121 @@ static void check_accessors()
 
 static void check_iterators()
 {
+	ft::map<std::string,int> m;
+	m.insert(ft::pair<std::string,int>("one", 1));
+	m.insert(ft::pair<std::string,int>("two", 2));
+	m.insert(ft::pair<std::string,int>("three", 3));
+
+	ft::map<std::string,int>::iterator i;
+	ft::map<std::string,int>::reverse_iterator ri;
+
 	std::cout << "\033[0;33m> Testing iterators\033[0m" << std::endl;
 	{ // begin
 		PRINT_CAT(15, "begin");
-		std::cout << std::endl;
+		i = m.begin();
+		if (*i != ft::pair<std::string,int>("one", 1)) {
+			PRINT_ERR("begin iterator does not return correct pair");
+		}
+		else
+			std::cout << OK_MSG;
+
+		++i;
+		if (*i != ft::pair<std::string,int>("three", 3)) {
+			PRINT_ERR("begin iterator does not return correct pair");
+		}
+		else
+			std::cout << OK_MSG;
+
+		++i;
+		if (*i != ft::pair<std::string,int>("two", 2)) {
+			PRINT_ERR("begin iterator does not return correct pair");
+		}
+		else
+			std::cout << OK_MSG;
+
+		++i;
+		if (i != m.end()) {
+			PRINT_ERR("Iterator does not equal end");
+		}
+		else
+			std::cout << OK_MSG << std::endl;
 	}
 	{ // end
 		PRINT_CAT(15, "end");
-		std::cout << std::endl;
+		i = m.end();
+		--i;
+		if (*i != ft::pair<std::string,int>("two", 2)) {
+			PRINT_ERR("begin iterator does not return correct pair");
+		}
+		else
+			std::cout << OK_MSG;
+
+		--i;
+		if (*i != ft::pair<std::string,int>("three", 3)) {
+			PRINT_ERR("begin iterator does not return correct pair");
+		}
+		else
+			std::cout << OK_MSG;
+
+		--i;
+		if (*i != ft::pair<std::string,int>("one", 1)) {
+			PRINT_ERR("begin iterator does not return correct pair");
+		}
+		else
+			std::cout << OK_MSG;
+
+		if (i != m.begin()) {
+			PRINT_ERR("Iterator does not equal end");
+		}
+		else
+			std::cout << OK_MSG << std::endl;
 	}
 	{ // rbegin
 		PRINT_CAT(15, "rbegin");
-		std::cout << std::endl;
+		ri = m.rbegin();
+		if (*ri != ft::pair<std::string,int>("two", 2)) {
+			PRINT_ERR("begin iterator does not return correct pair");
+		}
+		else
+			std::cout << OK_MSG;
+
+		++ri;
+		if (*ri != ft::pair<std::string,int>("three", 3)) {
+			PRINT_ERR("begin iterator does not return correct pair");
+		}
+		else
+			std::cout << OK_MSG;
+
+		++ri;
+		if (*ri != ft::pair<std::string,int>("one", 1)) {
+			PRINT_ERR("begin iterator does not return correct pair");
+		}
+		else
+			std::cout << OK_MSG << std::endl;
 	}
 	{ // rend
 		PRINT_CAT(15, "rend");
-		std::cout << std::endl;
+		ri = m.rend();
+		--ri;
+		if (*ri != ft::pair<std::string,int>("one", 1)) {
+			PRINT_ERR("begin iterator does not return correct pair");
+		}
+		else
+			std::cout << OK_MSG;
+
+		--ri;
+		if (*ri != ft::pair<std::string,int>("three", 3)) {
+			PRINT_ERR("begin iterator does not return correct pair");
+		}
+		else
+			std::cout << OK_MSG;
+
+		--ri;
+		if (*ri != ft::pair<std::string,int>("two", 2)) {
+			PRINT_ERR("begin iterator does not return correct pair");
+		}
+		else
+			std::cout << OK_MSG << std::endl;
 	}
 }
 
@@ -332,42 +431,42 @@ static void check_comparison() {
 //		PRINT_ERR("operator== does not return correct value");
 //	}
 //	else
-		std::cout << OK_MSG << std::endl;
+	std::cout <<std::endl;
 
 	PRINT_CAT(15, "operator!=");
 //	if (v4 != v2 || !(v3 != v1) || !(v1 != v3)) {
 //		PRINT_ERR("operator!= does not return correct value");
 //	}
 //	else
-		std::cout << OK_MSG << std::endl;
+	std::cout << std::endl;
 
 	PRINT_CAT(15, "operator<");
 //	if (!(v1 < v2) || !(v2 < v3) || !(v1 < v3) || v3 < v1) {
 //		PRINT_ERR("operator< does not return correct value");
 //	}
 //	else
-		std::cout << OK_MSG << std::endl;
+	std::cout << std::endl;
 
 	PRINT_CAT(15, "operator>");
 //	if (!(v2 > v1) || !(v3 > v2) || !(v3 > v1) || v1 > v3) {
 //		PRINT_ERR("operator> does not return correct value");
 //	}
 //	else
-		std::cout << OK_MSG << std::endl;
+	std::cout << std::endl;
 
 	PRINT_CAT(15, "operator<=");
 //	if (!(v2 <= v4) || !(v4 <= v2) || !(v1 <= v3) || v3 <= v1) {
 //		PRINT_ERR("operator<= does not return correct value");
 //	}
 //	else
-		std::cout << OK_MSG << std::endl;
+	std::cout << std::endl;
 
 	PRINT_CAT(15, "operator>=");
 //	if (!(v2 >= v4) || !(v4 >= v2) || !(v3 >= v1) || v1 >= v3) {
 //		PRINT_ERR("operator>= does not return correct value");
 //	}
 //	else
-		std::cout << OK_MSG << std::endl;
+	std::cout << std::endl;
 }
 
 void map_test()
