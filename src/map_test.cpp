@@ -1,6 +1,7 @@
 #include "map.hpp"
 #include "test.hpp"
 #include <iostream>
+#include <string>
 
 static void check_construction()
 {
@@ -143,11 +144,54 @@ static void check_capacity()
 	std::cout << "\033[0;33m> Testing capacity\033[0m" << std::endl;
 	{ // size
 		PRINT_CAT(15, "empty");
-		std::cout << std::endl;
+		ft::map<std::string,int> m;
+		if (!m.empty()) {
+			PRINT_ERR("A new map is not considered empty");
+		}
+		else
+			std::cout << OK_MSG;
+		m.insert(ft::pair<std::string,int>("s",5));
+		if (m.empty()) {
+			PRINT_ERR("Map is not considered empty when 1 element is inserted");
+		}
+		else
+			std::cout << OK_MSG;
+
+		m.clear();
+		if (!m.empty()) {
+			PRINT_ERR("Map is not considered empty when adding and removing 1 element");
+		}
+		else
+			std::cout << OK_MSG << std::endl;
 	}
 	{ // empty
 		PRINT_CAT(15, "size");
-		std::cout << std::endl;
+		ft::map<std::string,int> m;
+		m.insert(ft::pair<std::string,int>("one", 1));
+		m.insert(ft::pair<std::string,int>("two", 2));
+		m.insert(ft::pair<std::string,int>("three", 3));
+		m.insert(ft::pair<std::string,int>("four", 4));
+
+		if (m.size() != 4) {
+			PRINT_ERR("Size is not 4 when inserting 4 times");
+		}
+		else
+			std::cout << OK_MSG;
+
+		m.erase("one");
+		m.erase("two");
+		if (m.size() != 2){
+			PRINT_ERR("Did not return correct value when removing 2 elements");
+		}
+		else
+			std::cout << OK_MSG;
+
+		m.clear();
+		if (m.size() != 0) {
+			PRINT_ERR("Did not return 0 when using clear()");
+		}
+		else
+			std::cout << OK_MSG << std::endl;
 	}
 }
 

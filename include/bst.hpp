@@ -386,6 +386,8 @@ namespace ft
 		// modifiers
 		void clear()
 		{
+			if (m_root->isDummy())
+				return;
 			node_type* i = m_root->left_most();
 			while (i != NULL)
 			{
