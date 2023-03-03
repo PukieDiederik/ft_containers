@@ -89,12 +89,6 @@ namespace ft
 			Base m_base;
 
 		public:
-			//typedefs
-//			typedef typename m_traits::value_type			value_type;
-//			typedef typename m_traits::difference_type		difference_type;
-//			typedef typename m_traits::pointer				pointer;
-//			typedef typename m_traits::reference			reference;
-//			typedef typename m_traits::iterator_category	iterator_category;
 
 			//constructors
 			_iterator() : m_base(NULL) { }
@@ -209,12 +203,12 @@ namespace ft
 				return tmp;
 			}
 
-			value_type& operator* ()
+			value_type& operator* () const
 			{
 				return *m_base->value;
 			}
 
-			const value_type* operator-> () const
+			value_type* operator-> () const
 			{
 				return m_base->value;
 			}
@@ -288,7 +282,7 @@ namespace ft
 			m_node_alloc.construct(m_root, node_type(NULL));
 		}
 
-		BST(const BST& copy) // TODO: copy constructor
+		BST(const BST& copy)
 			:m_size(0), m_alloc(copy.m_node_alloc), m_node_alloc(copy.m_node_alloc), m_comp(copy.m_comp)
 		{
 			m_root = m_node_alloc.allocate(1);
@@ -541,61 +535,106 @@ namespace ft
 		iterator lower_bound(const key_type& k)
 		{
 			node_type *n = m_root;
-			node_type *t = NULL; // top result so far
+			node_type *t = m_root; // top result so far
+
+			if (n->isDummy())
+				return (iterator(n));
+			// if my key is more than rightmost, return end
+			while(!n->right->isDummy())
+				n = n->right;
+			if (!m_comp(k, n->value->first))
+				return end();
+			n = m_root;
+
 			while (!n->isDummy())
 			{
-				if (m_comp(k, n->value->first))
-				{
-					if (!t || m_comp(n->value->first, t->value->first))
-						t = n->value->first;
-					n = n->left;
-				}
-				else
+				if (!m_comp(k, n->value->first))
 					n = n->right;
+				else
+					n = n->left;
+				if (m_comp(t->value->first, k) || (!n->isDummy() && m_comp(n->value->first, t->value->first)
+												   && !m_comp(n->value->first, k)))
+				{
+					t = n;
+				}
 			}
-			if (!t)
-				return end();
 			return (iterator(t));
 		}
 		const_iterator lower_bound(const key_type& k) const
 		{
 			const node_type *n = m_root;
+			const node_type *t = m_root; // top result so far
+
+			if (n->isDummy())
+				return (const_iterator(n));
+			// if my key is more than rightmost, return end
+			while(!n->right->isDummy())
+				n = n->right;
+			if (!m_comp(k, n->value->first))
+				return end();
+			n = m_root;
+
+			while (!n->isDummy())
+			{
+				if (!m_comp(k, n->value->first))
+					n = n->right;
+				else
+					n = n->left;
+				if (m_comp(t->value->first, k) || (!n->isDummy() && m_comp(n->value->first, t->value->first)
+												   && !m_comp(n->value->first, k)))
+				{
+					t = n;
+				}
+			}
+			return (const_iterator(t));
+		}
+		iterator upper_bound(const key_type& k)
+		{
+			node_type *n = m_root;
+			node_type *t = m_root; // top result so far
+
+			if (n->isDummy())
+				return (iterator(n));
+			// if my key is more than rightmost, return end
+			while(!n->right->isDummy())
+				n = n->right;
+			if (m_comp(n->value->first, k))
+				return end();
+			n = m_root;
+
+			while (!n->isDummy())
+			{
+				if (!m_comp(k, n->value->first))
+					n = n->right;
+				else
+					n = n->left;
+				if (!m_comp(k, t->value->first) || (!n->isDummy() && m_comp(n->value->first, t->value->first)
+												   && m_comp(k, n->value->first)))
+				{
+					t = n;
+				}
+			}
+			return (iterator(t));
+		}
+		const_iterator upper_bound(const key_type& k) const
+		{
+			const node_type *n = m_root;
 			const node_type *t = NULL; // top result so far
 			while (!n->isDummy())
 			{
-				if (m_comp(k, n->value->first))
+				if (!m_comp(k, n->value->first))
 				{
-					if (!t || m_comp(n->value->first, t->value->first))
-						t = n->value->first;
-					n = n->left;
+					if (!t || (m_comp(n->value->first, t->value->first) && n->value->first != k))
+						t = n;
+					n = n->right;
 				}
 				else
-					n = n->right;
+					n = n->left;
 			}
 			if (!t)
 				return end();
 			return (const_iterator(t));
 		}
-//		iterator upper_bound(const key_type& k);
-//		const_iterator upper_bound(const key_type& k) const
-//		{
-//			const node_type *n = m_root;
-//			const node_type *t = NULL; // top result so far
-//			while (!n->isDummy())
-//			{
-//				if (comp(k, n->value->first))
-//				{
-//					if ((k != n->value->first) && !t || comp(n->value->first, t->value->first) )
-//						t = n->value->first;
-//					n = n->left;
-//				}
-//				else
-//					n = n->right;
-//			}
-//			if (!t)
-//				return end();
-//			return (const_iterator(t));
-//		}
 
 		node_type* base() { return m_root; }
 		const node_type* base() const { return m_root; }

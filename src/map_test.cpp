@@ -87,34 +87,245 @@ static void check_construction()
 
 static void check_accessors()
 {
+	ft::map<std::string, int> m;
+	m.insert(ft::pair<std::string,int>("one"  , 1));
+	m.insert(ft::pair<std::string,int>("two"  , 2));
+	m.insert(ft::pair<std::string,int>("three", 3));
+	m.insert(ft::pair<std::string,int>("four" , 4));
+	m.insert(ft::pair<std::string,int>("five" , 5));
+	m.insert(ft::pair<std::string,int>("six"  , 6));
+	m.insert(ft::pair<std::string,int>("seven", 7));
+	m.insert(ft::pair<std::string,int>("eight", 8));
+
 	std::cout << "\033[0;33m> Testing accessors\033[0m" << std::endl;
-	{ // default
+	{ // at
 		PRINT_CAT(15, "at");
-		std::cout << std::endl;
+
+		if (m.at("six") != 6) {
+			PRINT_ERR("Could not find using key");
+		}
+		else
+			std::cout << OK_MSG;
+
+		if (m.at("three") != 3) {
+			PRINT_ERR("Could not find using key");
+		}
+		else
+			std::cout << OK_MSG;
+
+		try {
+			m.at("ten");
+			PRINT_ERR("Did not throw when finding non-existent key");
+		}
+		catch (std::exception& e) {
+			std::cout << OK_MSG << std::endl;
+		}
 	}
-	{ // iterator
+	{ // operator[]
 		PRINT_CAT(15, "operator[]");
-		std::cout << std::endl;
+		ft::map<std::string, int> m2(m);
+
+		if (m2["six"] != 6) {
+			PRINT_ERR("Could not access using operator[]");
+		}
+		else
+			std::cout << OK_MSG;
+
+		if (m2["eight"] != 8) {
+			PRINT_ERR("Could not access using operator[]");
+		}
+		else
+			std::cout << OK_MSG;
+
+		m2["nine"] = 9;
+		if (m2["nine"] != 9) {
+			PRINT_ERR("Could not insert using operator[]");
+		}
+		else
+			std::cout << OK_MSG << std::endl;
 	}
 	{ // find
 		PRINT_CAT(15, "find");
-		std::cout << std::endl;
+
+		if (m.find("three")->second != 3) {
+			PRINT_ERR("Could not find using key");
+		}
+		else
+			std::cout << OK_MSG;
+
+		if (m.find("two")->second != 2) {
+			PRINT_ERR("Could not find using key");
+		}
+		else
+			std::cout << OK_MSG;
+
+		if (m.find("nine") != m.end()) {
+			PRINT_ERR("Somehow found non-existent key");
+		}
+		else
+			std::cout << OK_MSG << std::endl;
 	}
 	{ // equal_range
 		PRINT_CAT(15, "equal_range");
-		std::cout << std::endl;
+		ft::pair<ft::map<std::string,int>::iterator,ft::map<std::string,int>::iterator> i;
+
+		// equal
+		i = m.equal_range("one");
+		if (i.first->second != 1 && i.second->second == 7){
+			PRINT_ERR("Did not find existing number within map");
+		}
+		else
+			std::cout << OK_MSG;
+
+		// bigger than in tree
+		i = m.equal_range("z");
+		if (i.first != m.end() && i.second != m.end()) {
+			PRINT_ERR("found something when bigger than anything in map");
+		}
+		else
+			std::cout << OK_MSG;
+
+		i = m.equal_range("a");
+
+		if (i.first->second != 8 && i.second->second != 8) {
+			PRINT_ERR("did not find correct when lower than anything in map");
+		}
+		else
+			std::cout << OK_MSG;
+
+		i = m.equal_range("frodo");
+		if (i.first->second != 1 && i.second->second != 1) {
+			PRINT_ERR("did not find correctly when inside range of map");
+		}
+		else
+			std::cout << OK_MSG;
+
+		i = m.equal_range("thred");
+		if (i.first->second != 3 && i.second->second != 3) {
+			PRINT_ERR("did not find correctly when inside range of map");
+		}
+		else
+			std::cout << OK_MSG;
+
+		i = m.equal_range("thref");
+		if (i.first->second != 2 && i.second->second != 2) {
+			PRINT_ERR("did not find correctly when inside range of map");
+		}
+		else
+			std::cout << OK_MSG << std::endl;
 	}
 	{ // lower_bound
 		PRINT_CAT(15, "lower_bound");
-		std::cout << std::endl;
+		ft::map<std::string,int>::iterator i;
+
+		// equal
+		i = m.lower_bound("one");
+		if (i->second != 1){
+			PRINT_ERR("Did not find existing number within map");
+		}
+		else
+			std::cout << OK_MSG;
+
+		// bigger than in tree
+		i = m.lower_bound("z");
+		if (i != m.end()) {
+			PRINT_ERR("found something when bigger than anything in map");
+		}
+		else
+			std::cout << OK_MSG;
+
+		i = m.lower_bound("a");
+
+		if (i->second != 8) {
+			PRINT_ERR("did not find correct when lower than anything in map");
+		}
+		else
+			std::cout << OK_MSG;
+
+		i = m.lower_bound("frodo");
+		if (i->second != 1) {
+			PRINT_ERR("did not find correctly when inside range of map");
+		}
+		else
+			std::cout << OK_MSG;
+
+		i = m.lower_bound("thred");
+		if (i->second != 3) {
+			PRINT_ERR("did not find correctly when inside range of map");
+		}
+		else
+			std::cout << OK_MSG;
+
+		i = m.lower_bound("thref");
+		if (i->second != 2) {
+			PRINT_ERR("did not find correctly when inside range of map");
+		}
+		else
+			std::cout << OK_MSG << std::endl;
 	}
 	{ // upper_bound
 		PRINT_CAT(15, "upper_bound");
-		std::cout << std::endl;
+
+		ft::map<std::string,int>::iterator i;
+
+		// equal
+		i = m.upper_bound("one");
+		if (i->second != 7){
+			PRINT_ERR("Did not find existing number within map");
+		}
+		else
+			std::cout << OK_MSG;
+
+		// bigger than in tree
+		i = m.upper_bound("z");
+		if (i != m.end()) {
+			PRINT_ERR("found something when bigger than anything in map");
+		}
+		else
+			std::cout << OK_MSG;
+
+		i = m.upper_bound("a");
+
+		if (i->second != 8) {
+			PRINT_ERR("did not find correct when lower than anything in map");
+		}
+		else
+			std::cout << OK_MSG;
+
+		i = m.upper_bound("frodo");
+		if (i->second != 1) {
+			PRINT_ERR("did not find correctly when inside range of map");
+		}
+		else
+			std::cout << OK_MSG;
+
+		i = m.upper_bound("thred");
+		if (i->second != 3) {
+			PRINT_ERR("did not find correctly when inside range of map");
+		}
+		else
+			std::cout << OK_MSG;
+
+		i = m.upper_bound("thref");
+		if (i->second != 2) {
+			PRINT_ERR("did not find correctly when inside range of map");
+		}
+		else
+			std::cout << OK_MSG << std::endl;
 	}
 	{ // count
 		PRINT_CAT(15, "count");
-		std::cout << std::endl;
+		if (m.count("three") != 1 || m.count("eight") != 1) {
+			PRINT_ERR("did not get count back correctly with existent keys");
+		}
+		else
+			std::cout << OK_MSG;
+
+		if (m.count("thre") != 0 || m.count("ten") != 0) {
+			PRINT_ERR("Did not count correctly with non-existent keys");
+		}
+		else
+			std::cout << OK_MSG << std::endl;
 	}
 }
 

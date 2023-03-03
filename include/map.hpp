@@ -2,6 +2,7 @@
 #define MAP_HPP
 
 #include "bst.hpp"
+#include <stdexcept>
 
 namespace ft
 {
@@ -23,12 +24,12 @@ namespace ft
 		typedef typename Allocator::pointer			pointer;
 		typedef typename Allocator::const_pointer	const_pointer;
 
-		class value_comp
+		class value_compare
 		{
 			friend class map<Key, T, Compare, Allocator>;
 		protected:
 			Compare comp;
-			value_comp (Compare c) : comp(c) { }
+			value_compare (Compare c) : comp(c) { }
 		public:
 			typedef bool result_type;
 			typedef value_type first_argument_type;
@@ -74,10 +75,29 @@ namespace ft
 		map& operator=(const map& copy)
 			{ m_tree = copy.m_tree; return *this; }
 //
-//		T& at(const Key& key) { }
-//		const T& at (const Key& key) const { }
-//		T& operator[](const Key& key) { }
-//
+		T& at(const Key& key)
+		{
+			iterator i = m_tree.find(key);
+			if (i == m_tree.end())
+				throw std::out_of_range("key not found");
+			return (*i).second;
+		}
+		const T& at (const Key& key) const
+		{
+			iterator i = m_tree.find(key);
+			if (i == m_tree.end())
+				throw std::out_of_range("key not found");
+			return i->second;
+		}
+
+		T& operator[](const Key& key)
+		{
+			iterator i = m_tree.find(key);
+			if (i != m_tree.end())
+				return i->second;
+			return m_tree.insert(value_type(key,T())).first->second;
+		}
+
 		iterator begin() { return m_tree.begin(); }
 		const_iterator begin() const { return m_tree.begin(); }
 		iterator end() { return m_tree.end(); }
@@ -126,22 +146,26 @@ namespace ft
 		void swap( map& other) {m_tree.swap(other.m_tree);}
 
 //
-//		size_type  count(const Key& key) const { }
+		size_type  count(const Key& key) const
+		{
+			return (m_tree.find(key) == m_tree.end()) ? 0 : 1;
+		}
 //
 		iterator find(const Key& key) { return m_tree.find(key); }
 		const_iterator find(const Key& key) const { return m_tree.find(key); }
 //
-//		ft::pair<iterator, iterator> equal_range(const Key& key) { }
-//		ft::pair<const_iterator, const_iterator> equal_range(const Key& key) const { }
+		ft::pair<iterator, iterator> equal_range(const Key& key)
+		{ return ft::pair<iterator,iterator>(lower_bound(key), upper_bound(key)); }
+		ft::pair<const_iterator, const_iterator> equal_range(const Key& key) const { }
 //
-//		iterator lower_bound(const Key& key) { return m_tree.lower_bound(key); }
-//		const_iterator lower_bound(const Key& key) const { return m_tree.lower_bound(key); }
-//		iterator upper_bound(const Key& key) { return m_tree.upper_bound(key); }
-//		const_iterator upper_bound(const Key& key) const { return m_tree.upper_bound(key); }
-//
-//		key_compare key_comp() const;
-//		value_compare value_comp() const;
-//		allocator_type get_allocator() const { return m_tree.get_allocator();}
+		iterator lower_bound(const Key& key) { return m_tree.lower_bound(key); }
+		const_iterator lower_bound(const Key& key) const { return m_tree.lower_bound(key); }
+		iterator upper_bound(const Key& key) { return m_tree.upper_bound(key); }
+		const_iterator upper_bound(const Key& key) const { return m_tree.upper_bound(key); }
+
+		key_compare key_comp() const { return key_compare(); }
+		value_compare value_comp() const { return value_compare(key_compare()); }
+		allocator_type get_allocator() const { return m_tree.get_allocator();}
 	};
 
 	template<typename Key, typename T, typename Compare, typename Allocator>
