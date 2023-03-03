@@ -123,7 +123,8 @@ namespace ft
 			return 1;
 		}
 
-		void swap( map& other) { m_tree.swap(other.m_tree); }
+		void swap( map& other) {m_tree.swap(other.m_tree);}
+
 //
 //		size_type  count(const Key& key) const { }
 //
@@ -144,27 +145,36 @@ namespace ft
 	};
 
 	template<typename Key, typename T, typename Compare, typename Allocator>
-	bool operator==(ft::map<Key, T, Compare, Allocator>& lhs, const ft::map<Key, T, Compare, Allocator>& rhs)
+	bool operator==(const ft::map<Key, T, Compare, Allocator>& lhs, const ft::map<Key, T, Compare, Allocator>& rhs)
 	{ return lhs.size() == rhs.size() && ft::equal(lhs.begin(), lhs.end(), rhs.begin()); }
 	template<typename Key, typename T, typename Compare, typename Allocator>
-	bool operator!=(ft::map<Key, T, Compare, Allocator>& lhs, const ft::map<Key, T, Compare, Allocator>& rhs)
+	bool operator!=(const ft::map<Key, T, Compare, Allocator>& lhs, const ft::map<Key, T, Compare, Allocator>& rhs)
 	{ return !(lhs == rhs); }
 
-//	template<class T, class Alloc>
-//	bool operator<(const ft::vector<T, Alloc>& lhs, const ft::vector<T, Alloc>& rhs)
-//	{ return ft::lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(), rhs.end()); }
-//	template<class T, class Alloc>
-//	bool operator<=(const ft::vector<T, Alloc>& lhs, const ft::vector<T, Alloc>& rhs)
-//	{ return !(rhs < lhs); }
-//	template<class T, class Alloc>
-//	bool operator>(const ft::vector<T, Alloc>& lhs, const ft::vector<T, Alloc>& rhs)
-//	{ return rhs < lhs; }
-//	template<class T, class Alloc>
-//	bool operator>=(const ft::vector<T, Alloc>& lhs, const ft::vector<T, Alloc>& rhs)
-//	{ return !(lhs < rhs); }
+	template<typename Key, typename T, typename Compare, typename Allocator>
+	bool operator<(const ft::map<Key, T, Compare, Allocator>& lhs, const ft::map<Key, T, Compare, Allocator>& rhs)
+	{ return ft::lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(), rhs.end()); }
 
 	template<typename Key, typename T, typename Compare, typename Allocator>
-	void swap(ft::map<Key, T, Compare, Allocator>& x, ft::map<Key, T, Compare, Allocator>& y) { x.swap(y); }
+	bool operator<=(const ft::map<Key, T, Compare, Allocator>& lhs, const ft::map<Key, T, Compare, Allocator>& rhs)
+	{return !(rhs < lhs); }
+
+	template<typename Key, typename T, typename Compare, typename Allocator>
+	bool operator>(const ft::map<Key, T, Compare, Allocator>& lhs, const ft::map<Key, T, Compare, Allocator>& rhs)
+	{return rhs < lhs; }
+
+	template<typename Key, typename T, typename Compare, typename Allocator>
+	bool operator>=(const ft::map<Key, T, Compare, Allocator>& lhs, const ft::map<Key, T, Compare, Allocator>& rhs)
+	{return !(lhs < rhs); }
+}
+
+// Although overloading anything in STD namespace is technically illegal. This vector needs to function
+// like a std::vector. The only way I found to do this is to overload std::swap.
+// For more info: https://stackoverflow.com/a/7108123
+namespace std
+{
+	template<typename Key, typename T, typename Compare, typename Allocator>
+	void swap(ft::map<Key, T, Compare, Allocator>& lhs, ft::map<Key, T, Compare, Allocator>& rhs) { lhs.swap(rhs); }
 }
 
 #endif

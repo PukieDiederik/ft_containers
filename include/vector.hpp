@@ -411,6 +411,8 @@ namespace ft
 		template<typename Iter>
 		friend bool operator>=(const _iterator<Iter>& lhs, const _iterator<Iter>& rhs)
 		{ return lhs.base() >= rhs.base(); }
+
+		friend void swap(vector& a, vector& b) { using std::swap; a.swap(b);}
 	};
 
 	// Operators
@@ -433,10 +435,15 @@ namespace ft
 	template<class T, class Alloc>
 	bool operator>=(const ft::vector<T, Alloc>& lhs, const ft::vector<T, Alloc>& rhs)
 	{ return !(lhs < rhs); }
+}
 
+// Although overloading anything in STD namespace is technically illegal. This vector needs to function
+// like a std::vector. The only way I found to do this is to overload std::swap.
+// For more info: https://stackoverflow.com/a/7108123
+namespace std
+{
 	template<class T, class Alloc>
-	void swap(ft::vector<T, Alloc>& x, ft::vector<T, Alloc>& y)
-	{ x.swap(y); }
+	void swap(ft::vector<T, Alloc>& lhs, ft::vector<T, Alloc>& rhs) { lhs.swap(rhs); }
 }
 
 #endif

@@ -426,47 +426,66 @@ static void check_modifier()
 static void check_comparison() {
 	std::cout << "\033[0;33m> Testing comparison\033[0m" << std::endl;
 
+	ft::map<int,std::string> m1; // base
+	ft::map<int,std::string> m2; // should be bigger than m1
+	ft::map<int,std::string> m3; // should be smaller than m1 and m2
+	ft::map<int,std::string> m4; // same as base
+
+	m1.insert(ft::pair<int, std::string>(5,"five"));
+	m1.insert(ft::pair<int, std::string>(8,"eight"));
+	m1.insert(ft::pair<int, std::string>(9,"nine"));
+
+	m2.insert(ft::pair<int, std::string>(5,"five"));
+	m2.insert(ft::pair<int, std::string>(10,"ten"));
+	m2.insert(ft::pair<int, std::string>(8,"eight"));
+
+	m3.insert(ft::pair<int, std::string>(5, "five"));
+	m3.insert(ft::pair<int, std::string>(7, "seven"));
+	m3.insert(ft::pair<int, std::string>(10, "ten"));
+
+	m4 = m1;
+
 	PRINT_CAT(15, "operator==");
-//	if (!(v4 == v2) || v4 == v3) {
-//		PRINT_ERR("operator== does not return correct value");
-//	}
-//	else
-	std::cout <<std::endl;
+	if (!(m1 == m4) || m2 == m3 || m2 == m1 || m3 == m4) {
+		PRINT_ERR("operator== does not return correct value");
+	}
+	else
+		std::cout << OK_MSG << std::endl;
 
 	PRINT_CAT(15, "operator!=");
-//	if (v4 != v2 || !(v3 != v1) || !(v1 != v3)) {
-//		PRINT_ERR("operator!= does not return correct value");
-//	}
-//	else
-	std::cout << std::endl;
+	if (m1 != m4 || !(m2 != m3) || !(m3 != m1) || !(m2 != m4)) {
+		PRINT_ERR("operator!= does not return correct value");
+	}
+	else
+		std::cout << OK_MSG << std::endl;
 
 	PRINT_CAT(15, "operator<");
-//	if (!(v1 < v2) || !(v2 < v3) || !(v1 < v3) || v3 < v1) {
-//		PRINT_ERR("operator< does not return correct value");
-//	}
-//	else
-	std::cout << std::endl;
+	if (m1 < m4 || !(m1 < m2) || !(m3 < m2) || !(m3 < m4)) {
+		PRINT_ERR("operator< does not return correct value");
+	}
+	else
+		std::cout << OK_MSG << std::endl;
 
 	PRINT_CAT(15, "operator>");
-//	if (!(v2 > v1) || !(v3 > v2) || !(v3 > v1) || v1 > v3) {
-//		PRINT_ERR("operator> does not return correct value");
-//	}
-//	else
-	std::cout << std::endl;
+	if (m4 > m1 || !(m2 > m1) || !(m2 > m3) || !(m4 > m3)) {
+		PRINT_ERR("operator> does not return correct value");
+	}
+	else
+	std::cout << OK_MSG << std::endl;
 
 	PRINT_CAT(15, "operator<=");
-//	if (!(v2 <= v4) || !(v4 <= v2) || !(v1 <= v3) || v3 <= v1) {
-//		PRINT_ERR("operator<= does not return correct value");
-//	}
-//	else
-	std::cout << std::endl;
+	if (!(m1 <= m4) || !(m1 <= m2) || !(m3 <= m2) || !(m3 <= m4)) {
+		PRINT_ERR("operator<= does not return correct value");
+	}
+	else
+		std::cout << OK_MSG << std::endl;
 
 	PRINT_CAT(15, "operator>=");
-//	if (!(v2 >= v4) || !(v4 >= v2) || !(v3 >= v1) || v1 >= v3) {
-//		PRINT_ERR("operator>= does not return correct value");
-//	}
-//	else
-	std::cout << std::endl;
+	if (!(m4 >= m1) || !(m2 >= m1) || !(m2 >= m3) || !(m4 >= m3)) {
+		PRINT_ERR("operator>= does not return correct value");
+	}
+	else
+		std::cout << OK_MSG << std::endl;
 }
 
 void map_test()
