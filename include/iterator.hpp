@@ -83,8 +83,12 @@ namespace ft
 		reverse_iterator() :m_current(0) { }
 		reverse_iterator(iterator_type x) :m_current(x) { }
 		reverse_iterator(const reverse_iterator& x) :m_current(x.m_current) { }
+		template<typename It>
+		reverse_iterator(const reverse_iterator<It> copy) :m_current(copy.base()) { }
+
 		~reverse_iterator() { }
 
+		reverse_iterator& operator=(const reverse_iterator& copy) { m_current = copy.m_current; return *this; }
 		iterator_type base() const { return m_current; }
 
 		reference operator*() const { Iterator tmp = m_current; return *--tmp; }

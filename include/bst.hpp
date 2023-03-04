@@ -3,7 +3,7 @@
 
 #include "iterator.hpp"
 #include "pair.hpp"
-#include "vector.hpp"
+#include "stl.hpp"
 #include <functional>
 #include <memory>
 #include <iostream>
@@ -66,6 +66,174 @@ namespace ft
 		inline bool isLeaf() const { return left->isDummy() && right->isDummy(); }
 	};
 
+	template<typename T, typename N>
+	class _bst_iterator : public ft::iterator<std::bidirectional_iterator_tag, T>
+	{
+	private:
+		typedef ft::iterator_traits<ft::iterator<std::bidirectional_iterator_tag, T> > m_traits;
+		typedef N* Base;
+	protected:
+		Base m_base;
+
+	public:
+		typedef T	value_type;
+		typedef T&	reference;
+		typedef T*	pointer;
+		typedef const T&	const_reference;
+		typedef const T*	const_pointer;
+
+
+		//constructors
+		_bst_iterator() : m_base(NULL) { }
+		_bst_iterator(Base base) : m_base(base) { }
+		_bst_iterator(const _bst_iterator& copy) : m_base(copy.m_base) { }
+
+		~_bst_iterator() { }
+
+		_bst_iterator& operator=(const _bst_iterator& copy) { m_base = copy.m_base; return *this;}
+
+		operator _bst_iterator<const value_type, const N> () const
+		{
+			return _bst_iterator<const value_type, const N>(m_base);
+		}
+
+		_bst_iterator& operator++()
+		{
+			if (!m_base->parent && m_base->right->isDummy())
+			{
+				m_base = m_base->right;
+				return *this;
+			}
+			if (m_base->right->isDummy())
+			{
+				// if this node is the left side
+				if (m_base->parent->left == m_base)
+				{
+					m_base = m_base->parent;
+					return *this;
+				}
+				else // if the node is the right side
+				{
+					Base tmp = m_base;
+					while (tmp != tmp->parent->left)
+					{
+						tmp = tmp->parent;
+						if (!tmp->parent)
+						{
+							m_base = m_base->right;
+							return *this;
+						}
+					}
+					m_base = tmp->parent;
+					return *this;
+				}
+			}
+			else
+			{
+				Base tmp = m_base->right;
+				while (!tmp->left->isDummy())
+				{
+					tmp = tmp->left;
+				}
+				m_base = tmp;
+				return *this;
+			}
+		}
+
+		_bst_iterator operator++(int)
+		{
+			_bst_iterator tmp(*this);
+			operator++();
+			return tmp;
+		}
+
+		_bst_iterator& operator--()
+		{
+			if (m_base->isDummy())
+			{
+				m_base = m_base->parent;
+				return *this;
+			}
+			if (!m_base->parent && m_base->left->isDummy())
+			{
+				m_base = m_base->left;
+				return *this;
+			}
+			if (m_base->left->isDummy())
+			{
+				// if this node is the right side
+				if (m_base->parent->right == m_base)
+				{
+					m_base = m_base->parent;
+					return *this;
+				}
+				else // if the node is the left side
+				{
+					Base tmp = m_base;
+					while (tmp != tmp->parent->right)
+					{
+						tmp = tmp->parent;
+						if (!tmp->parent)
+						{
+							m_base = m_base->left;
+							return *this;
+						}
+					}
+					m_base = tmp->parent;
+					return *this;
+				}
+			}
+			else
+			{
+				Base tmp = m_base->left;
+				while (!tmp->right->isDummy())
+				{
+					tmp = tmp->right;
+				}
+				m_base = tmp;
+				return *this;
+			}
+		}
+		_bst_iterator operator--(int)
+		{
+			_bst_iterator tmp(*this);
+			operator--();
+			return tmp;
+		}
+
+		const value_type& operator* () const
+		{
+			return *m_base->value;
+		}
+
+		value_type& operator* ()
+		{
+			return *m_base->value;
+		}
+
+		value_type* operator-> ()
+		{
+			return m_base->value;
+		}
+
+		const value_type* operator-> () const
+		{
+			return m_base->value;
+		}
+
+		bool operator==(const _bst_iterator& rhs) const
+		{
+			return m_base == rhs.base();
+		}
+
+		bool operator!=(const _bst_iterator& rhs) const
+		{
+			return m_base != rhs.base();
+		}
+
+		const Base& base() const { return m_base; }
+	};
+
 	template <typename Key, typename T,
 			  typename Compare = std::less<Key>,
 			  typename Allocator = std::allocator<ft::pair<Key, T> >,
@@ -79,144 +247,6 @@ namespace ft
 		typedef Compare				value_compare;
 		typedef Allocator			allocator_type;
 
-	private:
-		template<typename Base>
-		class _iterator : public ft::iterator<std::bidirectional_iterator_tag, value_type>
-		{
-		private:
-			typedef ft::iterator_traits<ft::iterator<std::bidirectional_iterator_tag, value_type> > m_traits;
-		protected:
-			Base m_base;
-
-		public:
-
-			//constructors
-			_iterator() : m_base(NULL) { }
-			_iterator(Base base) : m_base(base) { }
-			_iterator(const _iterator& copy) : m_base(copy.m_base) { }
-
-			~_iterator() { }
-
-			_iterator& operator=(const _iterator& copy) { m_base = copy.m_base; return *this;}
-
-			_iterator& operator++()
-			{
-				if (!m_base->parent && m_base->right->isDummy())
-				{
-					m_base = m_base->right;
-					return *this;
-				}
-				if (m_base->right->isDummy())
-				{
-					// if this node is the left side
-					if (m_base->parent->left == m_base)
-					{
-						m_base = m_base->parent;
-						return *this;
-					}
-					else // if the node is the right side
-					{
-						Base tmp = m_base;
-						while (tmp != tmp->parent->left)
-						{
-							tmp = tmp->parent;
-							if (!tmp->parent)
-							{
-								m_base = m_base->right;
-								return *this;
-							}
-						}
-						m_base = tmp->parent;
-						return *this;
-					}
-				}
-				else
-				{
-					Base tmp = m_base->right;
-					while (!tmp->left->isDummy())
-					{
-						tmp = tmp->left;
-					}
-					m_base = tmp;
-					return *this;
-				}
-			}
-
-			_iterator& operator++(int)
-			{
-				Base tmp = m_base;
-				operator++();
-				return tmp;
-			}
-
-			_iterator& operator--()
-			{
-				if (m_base->isDummy())
-				{
-					m_base = m_base->parent;
-					return *this;
-				}
-				if (!m_base->parent && m_base->left->isDummy())
-				{
-					m_base = m_base->left;
-					return *this;
-				}
-				if (m_base->left->isDummy())
-				{
-					// if this node is the right side
-					if (m_base->parent->right == m_base)
-					{
-						m_base = m_base->parent;
-						return *this;
-					}
-					else // if the node is the left side
-					{
-						Base tmp = m_base;
-						while (tmp != tmp->parent->right)
-						{
-							tmp = tmp->parent;
-							if (!tmp->parent)
-							{
-								m_base = m_base->left;
-								return *this;
-							}
-						}
-						m_base = tmp->parent;
-						return *this;
-					}
-				}
-				else
-				{
-					Base tmp = m_base->left;
-					while (!tmp->right->isDummy())
-					{
-						tmp = tmp->right;
-					}
-					m_base = tmp;
-					return *this;
-				}
-			}
-			_iterator& operator--(int)
-			{
-				Base tmp = m_base;
-				operator--();
-				return tmp;
-			}
-
-			value_type& operator* () const
-			{
-				return *m_base->value;
-			}
-
-			value_type* operator-> () const
-			{
-				return m_base->value;
-			}
-
-			const Base& base() const { return m_base; }
-		};
-
-	public:
 		typedef _TreeNode<value_type>	node_type;
 		typedef typename Allocator::reference		reference;
 		typedef typename Allocator::const_reference	const_reference;
@@ -227,10 +257,10 @@ namespace ft
 		typedef std::size_t		size_type;
 		typedef std::ptrdiff_t	difference_type;
 
-		typedef _iterator<node_type*>				iterator;
-		typedef _iterator<const node_type*>			const_iterator;
-		typedef ft::reverse_iterator<iterator>			reverse_iterator;
-		typedef ft::reverse_iterator<const_iterator>	const_reverse_iterator;
+		typedef _bst_iterator<value_type, node_type>				iterator;
+		typedef _bst_iterator<const value_type, const node_type>	const_iterator;
+		typedef ft::reverse_iterator<iterator>						reverse_iterator;
+		typedef ft::reverse_iterator<const_iterator>				const_reverse_iterator;
 
 
 
@@ -283,7 +313,7 @@ namespace ft
 		}
 
 		BST(const BST& copy)
-			:m_size(0), m_alloc(copy.m_node_alloc), m_node_alloc(copy.m_node_alloc), m_comp(copy.m_comp)
+			:m_size(0), m_alloc(copy.m_alloc), m_node_alloc(copy.m_node_alloc), m_comp(copy.m_comp)
 		{
 			m_root = m_node_alloc.allocate(1);
 			m_node_alloc.construct(m_root, node_type(NULL));
@@ -640,18 +670,6 @@ namespace ft
 		const node_type* base() const { return m_root; }
 
 		allocator_type get_allocator() const { return m_alloc; }
-
-		// iterator
-		template<typename IterL, typename IterR>
-		friend bool operator==(const _iterator<IterL>& lhs, const _iterator<IterR>& rhs)
-		{
-			return lhs.base() == rhs.base();
-		}
-		template<typename IterL, typename IterR>
-		friend bool operator!=(const _iterator<IterL>& lhs, const _iterator<IterR>& rhs)
-		{
-			return lhs.base() != rhs.base();
-		}
 	};
 
 //	bool operator== ()
