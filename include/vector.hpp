@@ -94,10 +94,12 @@ namespace ft
 			: m_arr(NULL), m_size(0), m_capacity(0), m_alloc(alloc) { }
 		explicit vector(size_type count, const value_type& value = value_type(),
 			const allocator_type& alloc = allocator_type())
-			: m_size(count), m_capacity(count), m_alloc(alloc)
+			: m_arr(NULL), m_size(count), m_capacity(count), m_alloc(alloc)
 		{
 			if (count)
 				m_arr = m_alloc.allocate(count);
+			if (!m_arr)
+				return;
 			for (size_type i = 0; i < count; ++i)
 				m_alloc.construct(m_arr + i, value);
 		}
@@ -107,32 +109,39 @@ namespace ft
 			   :m_arr(0), m_size(0), m_capacity(0), m_alloc(alloc)
 		{
 			reserve(std::distance(first, last));
-			std::copy(first, last, m_arr);
+			for(size_type i = 0; first != last; ++first, ++i)
+				m_alloc.construct(m_arr + i, *first);
 			m_size = m_capacity;
 		}
 
 		vector(const vector& copy) : m_arr(NULL), m_size(copy.m_size), m_capacity(copy.m_capacity), m_alloc(copy.m_alloc) // Copy Constructor
 		{
 			if (m_capacity != 0)
-				m_arr = m_alloc.allocate(copy.m_capacity);
-			std::copy(copy.begin(), copy.end(), begin());
+				m_arr = m_alloc.allocate(m_capacity);
+			for (size_type i = 0; i < m_size; ++i)
+				m_alloc.construct(m_arr + i, copy.m_arr[i]);
 		}
 
 		~vector()
 		{
+			for (size_type i = 0; i < m_size; ++i)
+				m_alloc.destroy(m_arr + i);
 			if (m_arr)
 				m_alloc.deallocate(m_arr, m_capacity);
 		}
 
 		vector& operator=( const vector& copy) // Copy assignment
 		{
+			for (size_type i = 0; i < m_size; ++i)
+				m_alloc.destroy(m_arr + i);
 			if (m_arr)
 				m_alloc.deallocate(m_arr, m_capacity);
-			m_alloc = copy.m_alloc;
-			m_arr = m_alloc.allocate(copy.m_capacity);
-			std::copy(copy.begin(), copy.end(), m_arr);
-			m_size = copy.m_size;
 			m_capacity = copy.m_capacity;
+			m_alloc = copy.m_alloc;
+			m_arr = m_alloc.allocate(m_capacity);
+			m_size = copy.m_size;
+			for(size_type i = 0; i < m_size; ++i)
+				m_alloc.construct(m_arr + i, copy.m_arr[i]);
 			return *this;
 		}
 
@@ -221,7 +230,11 @@ namespace ft
 			pointer tmp = m_alloc.allocate(n);
 			if (m_arr)
 			{
-				std::memcpy(tmp, m_arr, sizeof(value_type)  * m_size);
+				for (size_type i = 0; i < m_size; ++i)
+				{
+					m_alloc.construct(tmp + i, m_arr[i]);
+					m_alloc.destroy(m_arr + i);
+				}
 				m_alloc.deallocate(m_arr, m_capacity);
 			}
 			m_arr = tmp;
@@ -233,7 +246,10 @@ namespace ft
 			if (m_size >= m_capacity)
 				return;
 			pointer tmp = m_alloc.allocate(m_size);
-			std::memcpy(tmp, m_arr, sizeof(value_type)  * m_size);
+			for(size_type i = 0; i < m_size; ++i) {
+				m_alloc.construct(tmp + i, m_arr[i]);
+				m_alloc.destroy(m_arr + i);
+			}
 			m_alloc.deallocate(m_arr, m_capacity);
 			m_arr = tmp;
 			m_capacity = m_size;
@@ -242,19 +258,12 @@ namespace ft
 		void resize(size_type count, value_type value = value_type())
 		{
 			if (count <= m_size) {
-				for (size_type i = 0; i < m_size - count; ++i)
+				for (size_type i = count; i < m_size; ++i)
 					m_alloc.destroy(m_arr + i);
 				m_size = count;
 				return;
 			}
-			if (count > m_capacity) {
-				pointer tmp = m_alloc.allocate(count);
-				std::memcpy(tmp, m_arr, sizeof(value_type) * m_size);
-				if (m_arr)
-					m_alloc.deallocate(m_arr, m_capacity);
-				m_arr = tmp;
-				m_capacity = count;
-			}
+			reserve(count);
 			for(size_type i = 0; i < count - m_size; ++i)
 				m_alloc.construct(m_arr + m_size + i, value);
 			m_size = count;
@@ -278,35 +287,39 @@ namespace ft
 			}
 			if (m_size == m_capacity)
 				reserve(m_capacity << 1);
-			std::memmove(m_arr + index + 1, m_arr + index, sizeof(value_type) * (m_size - index));
+			m_alloc.construct(m_arr + m_size, value_type());
+			std::copy_backward(begin() + index, end(), end() + 1);
+			*(m_arr + index) = value;
 			m_size++;
-			*(begin() + index) = value;
 			return (begin() + index);
 		}
 
 		void insert(iterator pos, size_type n, const value_type& value)
 		{
 			difference_type index = &*pos - m_arr;
-			if (m_size + n > m_capacity)
-				reserve(m_size + n);
-			if (pos != end())
-				std::copy_backward(begin() + index, end(), end() + n);
-			m_size += n;
+			reserve(m_size + n);
 			for(size_type i = 0; i < n; ++i)
-				m_alloc.construct(m_arr + index + i, value);
+				m_alloc.construct(m_arr + m_size + i, value_type());
+			if (m_arr + index != m_arr + m_size)
+				std::copy_backward(begin() + index, end(), end() + n);
+			std::fill_n(m_arr + index, n, value);
+			m_size += n;
 		}
+
 		template<class InputIt>
 		void insert(iterator pos, InputIt first, InputIt last,
 					typename ft::enable_if<!ft::is_integral<InputIt>::value>::type* = NULL)
 		{
 			difference_type index = pos - begin();
-			int n = std::distance(first, last);
+			size_type n = std::distance(first, last);
 			if (m_size + n > m_capacity)
 				reserve(m_size + n);
+			for(size_type i = 0; i < n; ++i)
+				m_alloc.construct(m_arr + m_size + i, value_type());
 			if (begin() + index != end())
 				std::copy_backward(begin() + index, end(), end() + n);
 			for (InputIt i = first; i != last; ++i, ++index)
-				m_alloc.construct(m_arr + index, *i);
+				*(m_arr + index) = *i;
 			m_size += n;
 		}
 
@@ -329,17 +342,9 @@ namespace ft
 		void push_back(const value_type& value)
 		{
 			if (m_capacity == 0)
-			{
-				m_capacity = 1;
-				m_arr = m_alloc.allocate(m_capacity);
-				m_alloc.construct(m_arr, value);
-				m_size = 1;
-				return;
-			}
+				reserve(1);
 			else if (m_size >= m_capacity)
-			{
 				reserve(m_capacity << 1);
-			}
 			m_alloc.construct(m_arr + m_size, value);
 			++m_size;
 		}
@@ -347,7 +352,7 @@ namespace ft
 		{
 			if (m_size == 0)
 				return;
-			m_alloc.destroy(m_arr + m_size);
+			m_alloc.destroy(m_arr + m_size - 1);
 			--m_size;
 		}
 		void swap(vector& other)
