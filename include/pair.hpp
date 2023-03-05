@@ -15,7 +15,7 @@ namespace ft
 		T2 second;
 
 		// Constructors
-		pair() : first(T1()), second(T2()) { }
+		pair() : first(), second() { }
 		pair(const T1& x, const T2& y) :first(x), second(y) { }
 		template<typename U1, typename U2>
 		pair(const pair<U1, U2>& p) :first(p.first), second(p.second) { }

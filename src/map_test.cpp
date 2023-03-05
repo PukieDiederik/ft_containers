@@ -234,6 +234,13 @@ static void check_accessors()
 		else
 			std::cout << OK_MSG;
 
+		i = m.lower_bound("two");
+		if (i->second != 2) {
+			PRINT_ERR("Did not find last in map");
+		}
+		else
+			std::cout << OK_MSG;
+
 		i = m.lower_bound("a");
 
 		if (i->second != 8) {

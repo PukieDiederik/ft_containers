@@ -9,6 +9,8 @@
 #include <iostream>
 #include <queue>
 
+#include <iostream>
+
 namespace ft
 {
 	template<typename T>
@@ -201,22 +203,23 @@ namespace ft
 			return tmp;
 		}
 
-		const value_type& operator* () const
+		reference operator* ()
 		{
 			return *m_base->value;
 		}
 
-		value_type& operator* ()
-		{
-			return *m_base->value;
-		}
-
-		value_type* operator-> ()
+		pointer operator-> ()
 		{
 			return m_base->value;
 		}
 
-		const value_type* operator-> () const
+		const_reference operator* () const
+		{
+			return *m_base->value;
+		}
+
+
+		const_pointer operator-> () const
 		{
 			return m_base->value;
 		}
@@ -235,23 +238,26 @@ namespace ft
 	};
 
 	template <typename Key, typename T,
-			  typename Compare = std::less<Key>,
-			  typename Allocator = std::allocator<ft::pair<Key, T> >,
-			  typename NodeAllocator = std::allocator<_TreeNode<ft::pair<Key, T> > > >
+			  typename Compare = std::less<const Key>,
+			  typename Allocator = std::allocator<ft::pair<Key, T> > >
 	class BST
 	{
+	private:
+		typedef typename Allocator::template rebind<ft::pair<const Key, T> >::other _alloc;
+		typedef typename Allocator::template rebind<_TreeNode<ft::pair<const Key, T> > >::other _node_alloc;
+
 	public:
 		typedef Key					key_type;
 		typedef T					mapped_type;
-		typedef ft::pair<Key, T>	value_type;
+		typedef ft::pair<const Key, T>	value_type;
 		typedef Compare				value_compare;
-		typedef Allocator			allocator_type;
+		typedef _alloc			allocator_type;
 
 		typedef _TreeNode<value_type>	node_type;
-		typedef typename Allocator::reference		reference;
-		typedef typename Allocator::const_reference	const_reference;
-		typedef typename Allocator::pointer			pointer;
-		typedef typename Allocator::const_pointer	const_pointer;
+		typedef typename _alloc::reference		reference;
+		typedef typename _alloc::const_reference	const_reference;
+		typedef typename _alloc::pointer			pointer;
+		typedef typename _alloc::const_pointer	const_pointer;
 
 
 		typedef std::size_t		size_type;
@@ -267,8 +273,8 @@ namespace ft
 	private:
 
 		size_type 		m_size;
-		Allocator 		m_alloc;
-		NodeAllocator	m_node_alloc;
+		_alloc 		m_alloc;
+		_node_alloc	m_node_alloc;
 		const Compare 		m_comp;
 
 		node_type* m_root;
@@ -306,7 +312,9 @@ namespace ft
 
 	public:
 		// Constructors/Destructors
-		explicit BST(Compare comp = Compare(), Allocator alloc = Allocator(), NodeAllocator nalloc = NodeAllocator())
+		explicit BST(Compare comp = Compare(),
+					 allocator_type alloc = allocator_type(),
+					 _node_alloc nalloc = _node_alloc())
 			:m_size(0), m_alloc(alloc), m_node_alloc(nalloc), m_comp(comp), m_root(m_node_alloc.allocate(1))
 		{
 			m_node_alloc.construct(m_root, node_type(NULL));
@@ -514,8 +522,8 @@ namespace ft
 		void swap(BST& other)
 		{
 			size_type		tmp_size = other.m_size;
-			Allocator		tmp_alloc = other.m_alloc;
-			NodeAllocator	tmp_node_alloc = other.m_node_alloc;
+			allocator_type		tmp_alloc = other.m_alloc;
+			_node_alloc	tmp_node_alloc = other.m_node_alloc;
 			node_type		*tmp_root = other.m_root;
 
 			other.m_size = m_size;
@@ -572,7 +580,7 @@ namespace ft
 			// if my key is more than rightmost, return end
 			while(!n->right->isDummy())
 				n = n->right;
-			if (!m_comp(k, n->value->first))
+			if (m_comp(n->value->first, k))
 				return end();
 			n = m_root;
 
@@ -590,6 +598,7 @@ namespace ft
 			}
 			return (iterator(t));
 		}
+
 		const_iterator lower_bound(const key_type& k) const
 		{
 			const node_type *n = m_root;
