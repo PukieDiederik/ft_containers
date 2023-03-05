@@ -17,18 +17,18 @@ static void check_construction()
 	}
 	{ // iterator
 		PRINT_CAT(15, "iterator");
-		ft::pair<const int,int> arr[] = {ft::make_pair(5, 5),
+		ft::pair<int,int> arr[] = {ft::make_pair(5, 5),
 										 ft::make_pair(9, 9),
 										 ft::make_pair(3, 3)};
 		ft::map<int,int> m(arr + 0, arr + 3);
-		if (m.size() != 3 || *(m.begin().base()->value) != arr[2]){
+		if (m.size() != 3 || m.begin().base()->value->first != arr[2].first){
 			PRINT_ERR("Could not construct with iterator");
 		}
 		else
 			std::cout << OK_MSG;
 
 		ft::map<int,int> n(arr + 0, arr + 2);
-		if (n.size() != 2 || *(n.begin().base()->value) != arr[0]){
+		if (n.size() != 2 || n.begin().base()->value->first != arr[0].first){
 			PRINT_ERR("Could not construct with iterator");
 		}
 		else
@@ -42,7 +42,7 @@ static void check_construction()
 	}
 	{ // copy
 		PRINT_CAT(15, "copy");
-		ft::pair<const int,int> arr[] = {ft::make_pair(5, 5),
+		ft::pair<int,int> arr[] = {ft::make_pair(5, 5),
 										 ft::make_pair(9, 9),
 										 ft::make_pair(3, 3)};
 		ft::map<int,int> m(arr + 0, arr + 3);
@@ -63,7 +63,7 @@ static void check_construction()
 	}
 	{ // copy-assignment
 		PRINT_CAT(15, "copy-assignment");
-		ft::pair<const int,int> arr[] = {ft::make_pair(5, 5),
+		ft::pair<int,int> arr[] = {ft::make_pair(5, 5),
 								   ft::make_pair(9, 9),
 								   ft::make_pair(3, 3)};
 		ft::map<int,int> m(arr + 0, arr + 3);
@@ -88,14 +88,14 @@ static void check_construction()
 static void check_accessors()
 {
 	ft::map<std::string, int> m;
-	m.insert(ft::pair<const std::string,int>("one"  , 1));
-	m.insert(ft::pair<const std::string,int>("two"  , 2));
-	m.insert(ft::pair<const std::string,int>("three", 3));
-	m.insert(ft::pair<const std::string,int>("four" , 4));
-	m.insert(ft::pair<const std::string,int>("five" , 5));
-	m.insert(ft::pair<const std::string,int>("six"  , 6));
-	m.insert(ft::pair<const std::string,int>("seven", 7));
-	m.insert(ft::pair<const std::string,int>("eight", 8));
+	m.insert(ft::pair<std::string,int>("one"  , 1));
+	m.insert(ft::pair<std::string,int>("two"  , 2));
+	m.insert(ft::pair<std::string,int>("three", 3));
+	m.insert(ft::pair<std::string,int>("four" , 4));
+	m.insert(ft::pair<std::string,int>("five" , 5));
+	m.insert(ft::pair<std::string,int>("six"  , 6));
+	m.insert(ft::pair<std::string,int>("seven", 7));
+	m.insert(ft::pair<std::string,int>("eight", 8));
 
 	std::cout << "\033[0;33m> Testing accessors\033[0m" << std::endl;
 	{ // at
@@ -339,9 +339,9 @@ static void check_accessors()
 static void check_iterators()
 {
 	ft::map<std::string,int> m;
-	m.insert(ft::pair<const std::string,int>("one", 1));
-	m.insert(ft::pair<const std::string,int>("two", 2));
-	m.insert(ft::pair<const std::string,int>("three", 3));
+	m.insert(ft::pair<std::string,int>("one", 1));
+	m.insert(ft::pair<std::string,int>("two", 2));
+	m.insert(ft::pair<std::string,int>("three", 3));
 
 	ft::map<std::string,int>::iterator i;
 	ft::map<std::string,int>::reverse_iterator ri;
@@ -467,7 +467,7 @@ static void check_capacity()
 		}
 		else
 			std::cout << OK_MSG;
-		m.insert(ft::pair<const std::string,int>("s",5));
+		m.insert(ft::pair<std::string,int>("s",5));
 		if (m.empty()) {
 			PRINT_ERR("Map is not considered empty when 1 element is inserted");
 		}
@@ -484,10 +484,10 @@ static void check_capacity()
 	{ // empty
 		PRINT_CAT(15, "size");
 		ft::map<std::string,int> m;
-		m.insert(ft::pair<const std::string,int>("one", 1));
-		m.insert(ft::pair<const std::string,int>("two", 2));
-		m.insert(ft::pair<const std::string,int>("three", 3));
-		m.insert(ft::pair<const std::string,int>("four", 4));
+		m.insert(ft::pair<std::string,int>("one", 1));
+		m.insert(ft::pair<std::string,int>("two", 2));
+		m.insert(ft::pair<std::string,int>("three", 3));
+		m.insert(ft::pair<std::string,int>("four", 4));
 
 		if (m.size() != 4) {
 			PRINT_ERR("Size is not 4 when inserting 4 times");
@@ -515,49 +515,49 @@ static void check_capacity()
 static void check_modifier()
 {
 	std::cout << "\033[0;33m> Testing modifiers\033[0m" << std::endl;
-	ft::pair<int,int> arr[] = { ft::pair<const int,int>(3,3),
-							    ft::pair<const int,int>(7,7),
-							    ft::pair<const int,int>(1,1),
-							    ft::pair<const int,int>(15,15),
-							    ft::pair<const int,int>(123,123),
-							    ft::pair<const int,int>(-6,-6),
-							    ft::pair<const int,int>(9,9)};
+	ft::pair<int,int> arr[] = { ft::pair<int,int>(3,3),
+							    ft::pair<int,int>(7,7),
+							    ft::pair<int,int>(1,1),
+							    ft::pair<int,int>(15,15),
+							    ft::pair<int,int>(123,123),
+							    ft::pair<int,int>(-6,-6),
+							    ft::pair<int,int>(9,9)};
 	{ // insert
 		PRINT_CAT(15, "insert");
 
 		ft::map<int, int> m(arr, arr + 7);
 		ft::pair<ft::map<int, int>::iterator, bool> i;
 
-		i = m.insert(ft::pair<const int,int>(2,2));
+		i = m.insert(ft::pair<int,int>(2,2));
 		if (m.size() != 8 || (*(i.first)).second != 2 || !i.second) {
 			PRINT_ERR("Did not insert value correctly or did not return correct value");
 		}
 		else
 			std::cout << OK_MSG;
-		i = m.insert(ft::pair<const int,int>(2,2));
+		i = m.insert(ft::pair<int,int>(2,2));
 		if (m.size() != 8 || (*(i.first)).second != 2 || i.second) {
 			PRINT_ERR("Did return correctly with duplicate");
 		}
 		else
 			std::cout << OK_MSG;
 
-		i.first = m.insert(i.first, ft::pair<const int,int>(19,19));
+		i.first = m.insert(i.first, ft::pair<int,int>(19,19));
 		if (m.size() != 9 || (*(i.first)).second != 19) {
 			PRINT_ERR("Did not insert correctly with hint");
 		}
 		else
 			std::cout << OK_MSG;
-		i.first = m.insert(i.first, ft::pair<const int,int>(19,19));
+		i.first = m.insert(i.first, ft::pair<int,int>(19,19));
 		if (m.size() != 9 || (*(i.first)).second != 19) {
 			PRINT_ERR("Did not return correct value when trying to insert 19");
 		}
 		else
 			std::cout << OK_MSG;
 
-		ft::pair<int, int> arr2[] = {ft::pair<const int,int>(13,13),
-									 ft::pair<const int,int>(-6,-6),
-									 ft::pair<const int,int>(-5,-5),
-									 ft::pair<const int,int>(-3,-3)};
+		ft::pair<int, int> arr2[] = {ft::pair<int,int>(13,13),
+									 ft::pair<int,int>(-6,-6),
+									 ft::pair<int,int>(-5,-5),
+									 ft::pair<int,int>(-3,-3)};
 		m.insert(arr2, arr2 + 4);
 		if (m.size() != 12) {
 			PRINT_ERR("Did not insert correctly with iterators");
@@ -578,7 +578,7 @@ static void check_modifier()
 		m.clear();
 		std::cout << OK_MSG; // Checks for errors with clearing an empty map
 
-		m.insert(ft::pair<const int, int>(3,5));
+		m.insert(ft::pair<int, int>(3,5));
 		m.clear();
 		if (m.size() != 0 || !m.empty()) {
 			PRINT_ERR("Did not clear correctly");
@@ -649,17 +649,17 @@ static void check_comparison() {
 	ft::map<int,std::string> m3; // should be smaller than m1 and m2
 	ft::map<int,std::string> m4; // same as base
 
-	m1.insert(ft::pair<const int, std::string>(5,"five"));
-	m1.insert(ft::pair<const int, std::string>(8,"eight"));
-	m1.insert(ft::pair<const int, std::string>(9,"nine"));
+	m1.insert(ft::pair<int, std::string>(5,"five"));
+	m1.insert(ft::pair<int, std::string>(8,"eight"));
+	m1.insert(ft::pair<int, std::string>(9,"nine"));
 
-	m2.insert(ft::pair<const int, std::string>(5,"five"));
-	m2.insert(ft::pair<const int, std::string>(10,"ten"));
-	m2.insert(ft::pair<const int, std::string>(8,"eight"));
+	m2.insert(ft::pair<int, std::string>(5,"five"));
+	m2.insert(ft::pair<int, std::string>(10,"ten"));
+	m2.insert(ft::pair<int, std::string>(8,"eight"));
 
-	m3.insert(ft::pair<const int, std::string>(5, "five"));
-	m3.insert(ft::pair<const int, std::string>(7, "seven"));
-	m3.insert(ft::pair<const int, std::string>(10, "ten"));
+	m3.insert(ft::pair<int, std::string>(5, "five"));
+	m3.insert(ft::pair<int, std::string>(7, "seven"));
+	m3.insert(ft::pair<int, std::string>(10, "ten"));
 
 	m4 = m1;
 
