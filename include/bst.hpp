@@ -681,8 +681,6 @@ namespace ft
 		allocator_type get_allocator() const { return m_alloc; }
 	};
 
-//	bool operator== ()
-
 	template <typename Key, typename T, typename Compare, typename Allocator>
 	void swap(typename ft::BST<Key, T, Compare, Allocator>& lhs,
 			  typename ft::BST<Key, T, Compare, Allocator>& rhs)
