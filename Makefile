@@ -5,6 +5,7 @@ FNAMES		=	vector_test.cpp stack_test.cpp map_test.cpp\
 				main.cpp
 
 SRCS		= $(addprefix $(SRCS_DIR)/,$(FNAMES))
+SPEED_SRCS	= $(addprefix $(SRCS_DIR)/,speed_test.cpp)
 OBJS		= $(addprefix $(OBJS_DIR)/,$(notdir $(FNAMES:.cpp=.o)))
 DEPS		= $(addprefix $(DEPS_DIR)/,$(notdir $(FNAMES:.cpp=.d)))
 
@@ -16,16 +17,18 @@ DEPS_DIR	= $(OBJS_DIR)
 
 CXX			= c++
 CXXFLAGS		= -Wall -Werror -Wextra -std=c++98 -pedantic\
-				  -g -fsanitize=address -fsanitize=leak
+				  #-g -fsanitize=address -fsanitize=leak
 INCLUDES	= -I $(INCLUDE_DIR)
 LIBS		=
 
 ## Other
-NAME		= tests
-RM			= rm -rf
-MAKE		= make -s
+NAME			= tests
+NAME_FT_SPEED	= ft_speed
+NAME_STD_SPEED	= std_speed
+RM				= rm -rf
+MAKE			= make -s
 
-ECHO		= echo -e
+ECHO			= echo -e
 
 
 # Colors
@@ -42,7 +45,17 @@ RESET		= \033[0m
 
 
 ## Targets
-all: $(NAME)
+all: $(NAME) speed
+
+speed: $(NAME_FT_SPEED) $(NAME_STD_SPEED)
+
+$(NAME_FT_SPEED): $(SPEED_SRCS)
+	@$(ECHO) "$(GREEN)>>>>> Creating $(RESET)$(@)$(RESET)"
+	@$(CXX) $(CXXFLAGS) -D STD=0 $(INCLUDES) $(SPEED_SRCS) -o $@
+
+$(NAME_STD_SPEED): $(SPEED_SRCS)
+	@$(ECHO) "$(GREEN)>>>>> Creating $(RESET)$(@)$(RESET)"
+	@$(CXX) $(CXXFLAGS) -D STD=1 $(INCLUDES) $(SPEED_SRCS) -o $@
 
 $(OBJS_DIR)/%.o: $(SRCS_DIR)/%.cpp | $(OBJS_DIR)
 	@$(ECHO) "$(GREEN)>>>>> Compiling $(RESET)$(notdir $<)$(GREEN) -> $(RESET)$(notdir $@)$(RESET)"
@@ -63,7 +76,7 @@ clean:
 
 fclean: clean
 	@$(ECHO) "Applying full clean"
-	@$(RM) $(OBJS_DIR) $(DEPS_DIR) $(NAME)
+	@$(RM) $(OBJS_DIR) $(DEPS_DIR) $(NAME) $(NAME_FT_SPEED) $(NAME_STD_SPEED)
 
 re: fclean all
 

@@ -1,6 +1,10 @@
 #build files
 build
+
 tests
+ft_speed
+std_speed
+
 
 # Editor files
 .idea

@@ -326,16 +326,23 @@ namespace ft
 		iterator erase(iterator pos)
 		{
 			m_alloc.destroy(&*pos);
-			std::memmove(&*pos, (&*pos) + 1, sizeof(value_type)  * (m_size - (&*(pos + 1) - m_arr)));
+			m_alloc.construct(&*pos, value_type());
+			std::copy(pos + 1, end(), pos);
 			m_size--;
+			m_alloc.destroy(&*end());
 			return pos;
 		}
 		iterator erase(iterator first, iterator last)
 		{
-			for(iterator i = first; i != last; ++i)
+			for(iterator i = first; i != last; ++i) {
 				m_alloc.destroy(&(*i));
-			std::memmove(&*first, &*last, sizeof(value_type)  * (end() - last));
-			m_size -= last - first;
+				m_alloc.construct(&*i, value_type());
+			}
+			std::copy(last, end(), first);
+			size_type n = std::distance(first, last);
+			for (size_type i = 0; i < n; ++i)
+				m_alloc.destroy((&*end()) - i - 1);
+			m_size -= n;
 			return first;
 		}
 
