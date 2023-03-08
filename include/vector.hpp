@@ -58,10 +58,15 @@ namespace ft
 		const const_pointer & base() const { return m_p; }
 	};
 
+	// Operator + and - when you use `n + iterator` instead of `iterator + n`
 	template<typename Base>
 	_iterator<Base> operator+(typename _iterator<Base>::difference_type n,
 										 _iterator<Base> i)
 	{ return i + n; }
+	template<typename Base>
+	_iterator<Base> operator-(typename _iterator<Base>::difference_type n,
+							  _iterator<Base> i)
+	{ return i - n; }
 
 	// Iterator comparison operators
 	template<typename IterL, typename IterR>
@@ -357,17 +362,31 @@ namespace ft
 		void insert(iterator pos, InputIt first, InputIt last,
 					typename ft::enable_if<!ft::is_integral<InputIt>::value>::type* = NULL)
 		{
+			pointer tmp = m_arr;
 			difference_type index = pos - begin();
 			size_type n = std::distance(first, last);
+			// Allocate new space if necessary (can't use reserve because iterators might be in current vector)
 			if (m_size + n > m_capacity)
-				reserve(m_size + n);
+			{
+				tmp = m_alloc.allocate(m_size + n);
+				for (size_type i = 0; i < m_size; ++i)
+					m_alloc.construct(tmp + i, m_arr[i]);
+			}
 			for(size_type i = 0; i < n; ++i)
-				m_alloc.construct(m_arr + m_size + i, value_type());
+				m_alloc.construct(tmp + m_size + i, value_type());
 			if (begin() + index != end())
-				std::copy_backward(begin() + index, end(), end() + n);
+				std::copy_backward(tmp + index, tmp + m_size, tmp + m_size + n);
 			for (InputIt i = first; i != last; ++i, ++index)
-				*(m_arr + index) = *i;
+				tmp[index] = *i;
+			if(m_arr != tmp)
+			{
+				for (size_t i = 0; i < m_size; ++i)
+					m_alloc.destroy(m_arr + i);
+				m_alloc.deallocate(m_arr, m_capacity);
+				m_capacity = m_size + n;
+			}
 			m_size += n;
+			m_arr = tmp;
 		}
 
 		iterator erase(iterator pos)

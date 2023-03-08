@@ -105,6 +105,17 @@ namespace ft
 		reverse_iterator& operator-=(difference_type n) { m_current += n; return *this; }
 	};
 
+	template<typename Iterator>
+	reverse_iterator<Iterator> operator+(typename reverse_iterator<Iterator>::difference_type n,
+										 reverse_iterator<Iterator> i)
+	{ return i + n; }
+
+	template<typename Iterator>
+	reverse_iterator<Iterator> operator-(typename reverse_iterator<Iterator>::difference_type n,
+										 reverse_iterator<Iterator> i)
+	{ return i - n; }
+
+
 	// Comparison Operators
 	template<typename Iter>
 	bool operator==(const reverse_iterator<Iter>& x, const reverse_iterator<Iter>& y) { return x.base() == y.base(); }
@@ -135,15 +146,6 @@ namespace ft
 	bool operator>=(const reverse_iterator<Iter>& x, const reverse_iterator<Iter>& y) { return !(x < y); }
 	template<typename IterL, typename IterR>
 	bool operator>=(const reverse_iterator<IterL>& x, const reverse_iterator<IterR>& y) { return !(x < y); }
-
-	//
-	template<typename Iter>
-	reverse_iterator<Iter> operator+(typename reverse_iterator<Iter>::difference_type n,
-									 const reverse_iterator<Iter>& it)
-	{ return (reverse_iterator<Iter>(it - n)); }
-	template<typename IterL, typename IterR>
-	reverse_iterator<IterL> operator-(const reverse_iterator<IterL>& x, const reverse_iterator<IterR>& y)
-	{ return (reverse_iterator<IterL>(x - y)); }
 }
 
 #endif
