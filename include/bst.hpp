@@ -69,18 +69,18 @@ namespace ft
 	};
 
 	template<typename T, typename N>
-	class _bst_iterator : public ft::iterator<std::bidirectional_iterator_tag, T>
+	class _bst_iterator : public ft::iterator<std::bidirectional_iterator_tag, N*>
 	{
 	private:
-		typedef ft::iterator_traits<ft::iterator<std::bidirectional_iterator_tag, T> > m_traits;
+		typedef ft::iterator_traits<ft::iterator<std::bidirectional_iterator_tag, N*> > m_traits;
 		typedef N* Base;
 	protected:
 		Base m_base;
 
 	public:
-		typedef T	value_type;
-		typedef T&	reference;
-		typedef T*	pointer;
+		typedef T			value_type;
+		typedef T&			reference;
+		typedef T*			pointer;
 		typedef const T&	const_reference;
 		typedef const T*	const_pointer;
 

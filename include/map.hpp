@@ -84,7 +84,7 @@ namespace ft
 		}
 		const T& at (const Key& key) const
 		{
-			iterator i = m_tree.find(key);
+			const_iterator i = m_tree.find(key);
 			if (i == m_tree.end())
 				throw std::out_of_range("key not found");
 			return i->second;
@@ -156,7 +156,8 @@ namespace ft
 //
 		ft::pair<iterator, iterator> equal_range(const Key& key)
 		{ return ft::pair<iterator,iterator>(lower_bound(key), upper_bound(key)); }
-		ft::pair<const_iterator, const_iterator> equal_range(const Key& key) const { }
+		ft::pair<const_iterator, const_iterator> equal_range(const Key& key) const
+		{ return ft::pair<const_iterator,const_iterator>(lower_bound(key), upper_bound(key));}
 //
 		iterator lower_bound(const Key& key) { return m_tree.lower_bound(key); }
 		const_iterator lower_bound(const Key& key) const { return m_tree.lower_bound(key); }
