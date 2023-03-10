@@ -21,14 +21,14 @@ static void check_construction()
 										 ft::make_pair(9, 9),
 										 ft::make_pair(3, 3)};
 		ft::map<int,int> m(arr + 0, arr + 3);
-		if (m.size() != 3 || m.begin().base()->value->first != arr[2].first){
+		if (m.size() != 3 || m.begin().base()->value.first != arr[2].first){
 			PRINT_ERR("Could not construct with iterator");
 		}
 		else
 			std::cout << OK_MSG;
 
 		ft::map<int,int> n(arr + 0, arr + 2);
-		if (n.size() != 2 || n.begin().base()->value->first != arr[0].first){
+		if (n.size() != 2 || n.begin().base()->value.first != arr[0].first){
 			PRINT_ERR("Could not construct with iterator");
 		}
 		else

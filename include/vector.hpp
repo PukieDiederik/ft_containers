@@ -36,7 +36,7 @@ namespace ft
 		~_iterator() { }
 
 		_iterator& operator=(_iterator copy) { m_p = copy.m_p; return *this; }
-		operator _iterator<const_pointer> () const { return _iterator<const_pointer>(m_p); }
+		operator _iterator<const Base> () const { return _iterator<const Base>(m_p); }
 
 		// Operators
 		reference operator* () const { return *m_p; }

@@ -56,18 +56,19 @@ namespace ft
 
 		// Constructors & Destructors
 		explicit map(const key_compare& comp = key_compare(Compare()), const allocator_type& alloc = allocator_type())
-			:m_tree(tree_type(comp, alloc)) { }
+			:m_tree(tree_type(comp)) { (void)alloc; }
 		template <typename InputIt>
 		map (InputIt first, InputIt last,
 			 const key_compare& comp = key_compare(),
 			 const allocator_type& alloc = allocator_type())
-			:m_tree(tree_type(comp, alloc))
+			:m_tree(tree_type(comp))
 		{
 			while (first != last)
 			{
 				m_tree.insert(*first);
 				++first;
 			}
+			(void) alloc;
 		}
 		map (const map& copy) :m_tree(copy.m_tree) { }
 		~map() { }
@@ -122,7 +123,7 @@ namespace ft
 			for(; first != last; ++first)
 				m_tree.insert(*first);
 		}
-//
+
 		iterator erase(iterator pos) { return m_tree.erase(pos); }
 		iterator erase(iterator first, iterator last)
 		{
@@ -145,20 +146,19 @@ namespace ft
 
 		void swap( map& other) {m_tree.swap(other.m_tree);}
 
-//
 		size_type  count(const Key& key) const
 		{
 			return (m_tree.find(key) == m_tree.end()) ? 0 : 1;
 		}
-//
+
 		iterator find(const Key& key) { return m_tree.find(key); }
 		const_iterator find(const Key& key) const { return m_tree.find(key); }
-//
+
 		ft::pair<iterator, iterator> equal_range(const Key& key)
 		{ return ft::pair<iterator,iterator>(lower_bound(key), upper_bound(key)); }
 		ft::pair<const_iterator, const_iterator> equal_range(const Key& key) const
 		{ return ft::pair<const_iterator,const_iterator>(lower_bound(key), upper_bound(key));}
-//
+
 		iterator lower_bound(const Key& key) { return m_tree.lower_bound(key); }
 		const_iterator lower_bound(const Key& key) const { return m_tree.lower_bound(key); }
 		iterator upper_bound(const Key& key) { return m_tree.upper_bound(key); }
