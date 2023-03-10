@@ -128,9 +128,9 @@ namespace ft
 	bool operator!=(const reverse_iterator<IterL>& x, const reverse_iterator<IterR>& y) { return !(x == y); }
 
 	template<typename Iter>
-	bool operator<(const reverse_iterator<Iter>& x, const reverse_iterator<Iter>& y) { return x.base() < y.base(); }
+	bool operator<(const reverse_iterator<Iter>& x, const reverse_iterator<Iter>& y) { return x.base() > y.base(); }
 	template<typename IterL, typename IterR>
-	bool operator<(const reverse_iterator<IterL>& x, const reverse_iterator<IterR>& y) { return x.base() < y.base(); }
+	bool operator<(const reverse_iterator<IterL>& x, const reverse_iterator<IterR>& y) { return x.base() > y.base(); }
 
 	template<typename Iter>
 	bool operator>(const reverse_iterator<Iter>& x, const reverse_iterator<Iter>& y) { return y < x; }

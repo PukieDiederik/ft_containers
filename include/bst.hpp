@@ -13,6 +13,7 @@
 
 namespace ft
 {
+	// Nodes for binary tree
 	template<typename T>
 	struct _TreeNode
 	{
@@ -35,14 +36,46 @@ namespace ft
 			return *this;
 		}
 
-		_TreeNode* left_most()
+		_TreeNode *left_most()
+		{
+			_TreeNode* tmp = this;
+			while (!tmp->isDummy() && !tmp->left->isDummy())
+				tmp = tmp->left;
+			return tmp;
+		}
+
+		_TreeNode *right_most()
+		{
+			_TreeNode* tmp = this;
+			while (!tmp->isDummy() && !tmp->right->isDummy())
+				tmp = tmp->right;
+			return tmp;
+		}
+
+		_TreeNode* left_most() const
+		{
+			const _TreeNode* tmp = this;
+			while (!tmp->isDummy() && !tmp->left->isDummy())
+				tmp = tmp->left;
+			return tmp;
+		}
+
+		_TreeNode* right_most() const
+		{
+			const _TreeNode* tmp = this;
+			while (!tmp->isDummy() && !tmp->right->isDummy())
+				tmp = tmp->right;
+			return tmp;
+		}
+
+		_TreeNode* left_most_leaf()
 		{
 			_TreeNode* tmp = this;
 			while (!tmp->isDummy() && !tmp->isLeaf())
 				tmp = (tmp->left->isDummy()) ? tmp->right : tmp->left;
 			return tmp;
 		}
-		_TreeNode* right_most()
+		_TreeNode* right_most_leaf()
 		{
 			_TreeNode* tmp = this;
 			while (!tmp->isDummy() && !tmp->isLeaf())
@@ -50,16 +83,16 @@ namespace ft
 			return tmp;
 		}
 
-		const _TreeNode* left_most() const
+		const _TreeNode* left_most_leaf() const
 		{
-			_TreeNode* tmp = this;
+			const _TreeNode* tmp = this;
 			while (!tmp->isDummy() && !tmp->isLeaf())
 				tmp = (tmp->left->isDummy()) ? tmp->right : tmp->left;
 			return tmp;
 		}
-		const _TreeNode* right_most() const
+		const _TreeNode* right_most_leaf() const
 		{
-			_TreeNode* tmp = this;
+			const _TreeNode* tmp = this;
 			while (!tmp->isDummy() && !tmp->isLeaf())
 				tmp = (tmp->right->isDummy()) ? tmp->left : tmp->right;
 			return tmp;
@@ -69,6 +102,7 @@ namespace ft
 		inline bool isLeaf() const { return left->isDummy() && right->isDummy(); }
 	};
 
+	// Iterator for map/BST
 	template<typename T, typename N>
 	class _bst_iterator : public ft::iterator<std::bidirectional_iterator_tag, N*>
 	{
@@ -243,20 +277,22 @@ namespace ft
 		const Base& base() const { return m_base; }
 	};
 
+	// BST
 	template <typename Key, typename T,
 			  typename Compare = std::less<const Key>,
 			  typename Allocator = std::allocator<ft::pair<Key, T> > >
 	class BST
 	{
 	private:
+		// We will need a treenode allocator instead of value_type
 		typedef typename Allocator::template rebind<_TreeNode<ft::pair<const Key, T> > >::other _alloc;
 
 	public:
-		typedef Key					key_type;
-		typedef T					mapped_type;
+		typedef Key						key_type;
+		typedef T						mapped_type;
 		typedef ft::pair<const Key, T>	value_type;
-		typedef Compare				value_compare;
-		typedef _alloc			allocator_type;
+		typedef _alloc					allocator_type;
+		typedef Compare					value_compare;
 
 		typedef _TreeNode<value_type>	node_type;
 		typedef value_type&				reference;
@@ -264,25 +300,22 @@ namespace ft
 		typedef value_type*				pointer;
 		typedef const value_type*		const_pointer;
 
-
-		typedef std::size_t		size_type;
-		typedef std::ptrdiff_t	difference_type;
-
 		typedef _bst_iterator<value_type, node_type>				iterator;
 		typedef _bst_iterator<const value_type, const node_type>	const_iterator;
 		typedef ft::reverse_iterator<iterator>						reverse_iterator;
 		typedef ft::reverse_iterator<const_iterator>				const_reverse_iterator;
 
-
+		typedef std::size_t		size_type;
+		typedef std::ptrdiff_t	difference_type;
 
 	private:
 		// Variables
 		size_type 		m_size;
 		_alloc			m_alloc;
-		const Compare 		m_comp;
+		const Compare	m_comp;
 
-		node_type* m_nil_node;
-		node_type* m_root;
+		node_type*	m_nil_node;
+		node_type*	m_root;
 
 	public:
 		// Constructors/Destructors
@@ -295,20 +328,9 @@ namespace ft
 		BST(const BST& copy)
 			:m_size(0), m_alloc(copy.m_alloc), m_comp(copy.m_comp), m_nil_node(m_alloc.allocate(1)),m_root(m_nil_node)
 		{
+			// Construct new nil node
 			m_alloc.construct(m_nil_node, node_type(value_type(), NULL, NULL));
-			if (copy.empty())
-				return;
-			std::queue<node_type*> q;
-			q.push(copy.m_root);
-			while (!q.empty())
-			{
-				insert(q.front()->value);
-				if (!q.front()->left->isDummy())
-					q.push(q.front()->left);
-				if (!q.front()->right->isDummy())
-					q.push(q.front()->right);
-				q.pop();
-			}
+			*this = copy;
 		}
 
 		~BST()
@@ -320,9 +342,12 @@ namespace ft
 
 		BST& operator=(const BST& copy)
 		{
+			// Make the sure the current BST is empty
 			clear();
+			// if there is nothing to copy, just skip
 			if (copy.empty())
 				return *this;
+			// Insert new nodes DFS
 			std::queue<node_type*> q;
 			q.push(copy.m_root);
 			while (!q.empty())
@@ -338,37 +363,15 @@ namespace ft
 		}
 
 		// Iterators
-		iterator begin()
-		{
-			node_type* i = m_root;
-			while(!i->isDummy() && !i->left->isDummy())
-			{
-				i = i->left;
-			}
-			return iterator(i);
-		}
-		const_iterator begin() const
-		{
-			const node_type* i = m_root;
-			while(!i->isDummy() && !i->left->isDummy())
-			{
-				i = i->left;
-			}
-			return const_iterator(i);
-		}
-		iterator end()
-		{
-			return iterator(m_nil_node);
-		}
-		const_iterator end() const
-		{
-			return const_iterator(m_nil_node);
-		}
+		iterator begin()				{ return iterator(m_root->left_most()); }
+		const_iterator begin() const	{ return const_iterator(m_root->left_most()); }
+		iterator end()					{ return iterator(m_nil_node); }
+		const_iterator end() const		{ return const_iterator(m_nil_node); }
 
-		reverse_iterator rbegin() { return reverse_iterator(end()); }
-		const_reverse_iterator rbegin() const { return const_reverse_iterator (end()); }
-		reverse_iterator rend() {return reverse_iterator(begin()); }
-		const_reverse_iterator rend() const { return const_reverse_iterator(begin()); }
+		reverse_iterator rbegin()				{ return reverse_iterator(end()); }
+		const_reverse_iterator rbegin() const	{ return const_reverse_iterator (end()); }
+		reverse_iterator rend()					{ return reverse_iterator(begin()); }
+		const_reverse_iterator rend() const		{ return const_reverse_iterator(begin()); }
 
 		// Capacity
 		bool empty() const { return m_size == 0; }
@@ -380,21 +383,23 @@ namespace ft
 		{
 			if (m_root->isDummy())
 				return;
-			node_type* i = m_root->left_most();
-			while (i != NULL)
+
+			// Find the left most leaf node, then keep going until we're finished
+			for (node_type* i = m_root->left_most_leaf(), *next; i != NULL; i = next)
 			{
-				node_type *next;
+				// Figure out which node is next
 				if (i->parent && i->parent->right != i && !i->parent->right->isDummy())
-					next = i->parent->right->left_most();
+					next = i->parent->right->left_most_leaf();
 				else
 					next = i->parent;
 
+				// Destroy current node
 				m_alloc.destroy(i);
 				m_alloc.deallocate(i, 1);
-
-				i = next;
 			}
+			// Set root to be the nil node
 			m_root = m_nil_node;
+			// Fix nil node's parent
 			m_nil_node->parent = NULL;
 			m_size = 0;
 		}
@@ -402,9 +407,9 @@ namespace ft
 		ft::pair<iterator, bool> insert(const value_type& value)
 		{
 			node_type* cur = m_root;
-			node_type** pref;
+			node_type** pref; // a pointer to which side of cur it should be inserted
 
-			// special case if map is empty
+			// If the map is empty
 			if (cur->isDummy())
 			{
 				m_root = m_alloc.allocate(1);
@@ -413,6 +418,7 @@ namespace ft
 				++m_size;
 				return ft::make_pair<iterator, bool>(iterator(m_root), true);
 			}
+
 			// find place to insert
 			while (!cur->isDummy() && cur->value.first != value.first)
 			{
@@ -421,14 +427,17 @@ namespace ft
 				else
 					pref = &cur->right;
 
+				// Checks if we have found the place to insert
 				if ((*pref)->isDummy())
 					break;
 				else
 					cur = *pref;
 			}
+			// If we found the key, do not insert it
 			if (cur->value.first == value.first)
 				return ft::make_pair<iterator, bool>(iterator(cur), false);
-			// create new node
+
+			// Create new node
 			*pref = m_alloc.allocate(1);
 			m_alloc.construct(*pref, node_type(value, cur, m_nil_node));
 			++m_size;
@@ -438,31 +447,39 @@ namespace ft
 			return ft::make_pair<iterator, bool>(iterator(*pref), true);
 		}
 
+	private:
+		void erase_helper(node_type* n, node_type* lhs)
+		{
+			if (n->parent)
+			{
+				if (n == n->parent->left)
+					n->parent->left = lhs;
+				else
+					n->parent->right = lhs;
+			}
+			else
+				m_root = lhs;
+
+			if (!lhs->isDummy())
+				lhs->parent = n->parent;
+		}
+	public:
+
 		iterator erase(iterator pos)
 		{
 			node_type *n = pos.base();
 			iterator next = ++pos;
 
+			// If the position we're trying to erase is end(), return
 			if (n->isDummy())
 				return pos;
 
-			// if it only has one node or no child nodes
+			// If it only has one node, or it has no child nodes
 			if (n->right->isDummy())
 			{
-				// detach
-				if (n->parent)
-				{
-					if (n == n->parent->left)
-						n->parent->left = n->left;
-					else
-						n->parent->right = n->left;
-				}
-				else
-					m_root = n->left;
-				if (!n->left->isDummy())
-					n->left->parent = n->parent;
+				erase_helper(n, n->left);
 
-				//fix nil node
+				// Fix nil node
 				if (m_nil_node->parent == n && !n->left->isDummy())
 					m_nil_node->parent = n->left;
 				else if (m_nil_node->parent == n)
@@ -470,20 +487,9 @@ namespace ft
 			}
 			else if (n->left->isDummy())
 			{
-				// detach
-				if (n->parent)
-				{
-					if (n == n->parent->left)
-						n->parent->left = n->right;
-					else
-						n->parent->right = n->right;
-				}
-				else
-					m_root = n->right;
-				if (!n->right->isDummy())
-					n->right->parent = n->parent;
+				erase_helper(n, n->right);
 
-				//fix nil node
+				// Fix nil node
 				if (m_nil_node->parent == n)
 					m_nil_node->parent = n->right;
 			}
@@ -491,10 +497,7 @@ namespace ft
 			// if it has 2 children
 			else
 			{
-				node_type *rl = n->right;
-
-				while (!rl->left->isDummy())
-					rl = rl->left;
+				node_type *rl = n->right->left_most();
 
 				// detach rl
 				if (rl->parent->left == rl)
@@ -510,11 +513,12 @@ namespace ft
 						rl->right->parent = rl->parent;
 				}
 
+				// Set rl to n
 				rl->parent = n->parent;
 				rl->left = n->left;
 				rl->right = n->right;
 
-				//detach n
+				// Detach n
 				if (n->parent)
 				{
 					if (n->parent->left == n)
@@ -525,12 +529,14 @@ namespace ft
 				else
 					m_root = rl;
 
-				if (m_nil_node != rl->left)
+				// Fix rl's (n) children
+				if (!rl->left->isDummy())
 					rl->left->parent = rl;
-				if (m_nil_node != rl->right)
+				if (!rl->right->isDummy())
 					rl->right->parent = rl;
 			}
 
+			// destroy and deallocate N
 			--m_size;
 			m_alloc.destroy(n);
 			m_alloc.deallocate(n, 1);
@@ -562,28 +568,17 @@ namespace ft
 		{
 			node_type *n = m_root;
 			while (!n->isDummy() && n->value.first != key)
-			{
-				if (m_comp(key, n->value.first))
-					n = n->left;
-				else
-					n = n->right;
-			}
+				n = m_comp(key, n->value.first) ? n->left : n->right;
 			return iterator(n);
 		}
 		const_iterator find(const key_type& key) const
 		{
 			const node_type *n = m_root;
 			while (!n->isDummy() && n->value.first != key)
-			{
-				if (m_comp(key, n->value.first))
-					n = n->left;
-				else
-					n = n->right;
-			}
+				n = m_comp(key, n->value.first) ? n->left : n->right;
 			return const_iterator(n);
 		}
 
-		//finds the first node not less than k.
 		iterator lower_bound(const key_type& k)
 		{
 			node_type *n = m_root;
@@ -591,24 +586,16 @@ namespace ft
 
 			if (n->isDummy())
 				return (iterator(n));
-			// if my key is more than rightmost, return end
-			while(!n->right->isDummy())
-				n = n->right;
-			if (m_comp(n->value.first, k))
+			// If the key is more than rightmost, return end
+			if (m_comp(m_root->right_most()->value.first, k))
 				return end();
-			n = m_root;
 
 			while (!n->isDummy())
 			{
-				if (!m_comp(k, n->value.first))
-					n = n->right;
-				else
-					n = n->left;
+				n = (!m_comp(k, n->value.first)) ? n->right : n->left;
 				if (m_comp(t->value.first, k) || (!n->isDummy() && m_comp(n->value.first, t->value.first)
 												   && !m_comp(n->value.first, k)))
-				{
 					t = n;
-				}
 			}
 			return (iterator(t));
 		}
@@ -620,24 +607,16 @@ namespace ft
 
 			if (n->isDummy())
 				return (const_iterator(n));
-			// if my key is more than rightmost, return end
-			while(!n->right->isDummy())
-				n = n->right;
-			if (!m_comp(k, n->value.first))
+			// If the key is more than rightmost, return end
+			if (m_comp(m_root->right_most()->value.first, k))
 				return end();
-			n = m_root;
 
 			while (!n->isDummy())
 			{
-				if (!m_comp(k, n->value.first))
-					n = n->right;
-				else
-					n = n->left;
+				n = (!m_comp(k, n->value.first)) ? n->right : n->left;
 				if (m_comp(t->value.first, k) || (!n->isDummy() && m_comp(n->value.first, t->value.first)
 												   && !m_comp(n->value.first, k)))
-				{
 					t = n;
-				}
 			}
 			return (const_iterator(t));
 		}
@@ -648,50 +627,43 @@ namespace ft
 
 			if (n->isDummy())
 				return (iterator(n));
-			// if my key is more than rightmost, return end
-			while(!n->right->isDummy())
-				n = n->right;
-			if (m_comp(n->value.first, k))
+			// If the key is more than rightmost, return end
+			if (m_comp(m_root->right_most()->value.first, k))
 				return end();
-			n = m_root;
 
 			while (!n->isDummy())
 			{
-				if (!m_comp(k, n->value.first))
-					n = n->right;
-				else
-					n = n->left;
+				n = (!m_comp(k, n->value.first)) ? n->right : n->left;
 				if (!m_comp(k, t->value.first) || (!n->isDummy() && m_comp(n->value.first, t->value.first)
 												   && m_comp(k, n->value.first)))
-				{
 					t = n;
-				}
 			}
 			return (iterator(t));
 		}
+
 		const_iterator upper_bound(const key_type& k) const
 		{
 			const node_type *n = m_root;
-			const node_type *t = NULL; // top result so far
+			const node_type *t = m_root; // top result so far
+
+			if (n->isDummy())
+				return (const_iterator(n));
+			// If the key is more than rightmost, return end
+			if (m_comp(m_root->right_most()->value.first, k))
+				return end();
+
 			while (!n->isDummy())
 			{
-				if (!m_comp(k, n->value.first))
-				{
-					if (!t || (m_comp(n->value.first, t->value.first) && n->value.first != k))
-						t = n;
-					n = n->right;
-				}
-				else
-					n = n->left;
+				n = (!m_comp(k, n->value.first)) ? n->right : n->left;
+				if (!m_comp(k, t->value.first) || (!n->isDummy() && m_comp(n->value.first, t->value.first)
+												   && m_comp(k, n->value.first)))
+					t = n;
 			}
-			if (!t)
-				return end();
 			return (const_iterator(t));
 		}
 
-		node_type* base() { return m_root; }
-		const node_type* base() const { return m_root; }
-
+		node_type* base()				{ return m_root; }
+		const node_type* base() const	{ return m_root; }
 		allocator_type get_allocator() const { return m_alloc; }
 	};
 }
